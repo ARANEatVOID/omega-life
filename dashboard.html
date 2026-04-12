@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMEGA LIFE — Command Deck</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="dashboard-page">
+    <div id="toast-container"></div>
+
+    <div id="dash-sidebar-overlay" class="dash-sidebar-overlay" aria-hidden="true"></div>
+
+    <header id="dash-topbar" class="dash-topbar">
+      <a href="index.html" class="dash-topbar__logo font-orbitron">ΩMEGA LIFE</a>
+      <p id="motivation-quote" class="dash-topbar__quote"></p>
+      <div class="dash-topbar__actions">
+        <a class="btn btn-cyan btn-top-sm" href="architect.html">🤖 ARCHITECT</a>
+        <button type="button" class="btn btn-muted btn-top-sm" id="dash-logout">LOGOUT</button>
+        <button type="button" class="dash-topbar__hamburger" id="sidebar-toggle" aria-label="Open menu">☰</button>
+      </div>
+    </header>
+
+    <aside id="dash-sidebar" class="dash-sidebar">
+      <div class="dash-sidebar__inner">
+        <div class="dash-avatar-wrap">
+          <div class="dash-avatar" id="dash-avatar-ring">
+            <span id="dash-avatar-emoji">🎮</span>
+          </div>
+        </div>
+        <p class="dash-realname muted" id="dash-realname"></p>
+        <p class="dash-playertag glitch font-orbitron" id="dash-playertag"></p>
+        <div class="dash-title-edit">
+          <span class="dash-title-text italic" id="dash-title-display"></span>
+          <button type="button" class="dash-title-pen" id="dash-title-edit-btn" aria-label="Edit title">✏️</button>
+        </div>
+        <div class="dash-title-input-wrap is-hidden" id="dash-title-input-wrap">
+          <input type="text" class="form-input" id="dash-title-input" />
+        </div>
+        <div class="dash-life-badge font-orbitron" id="dash-life-badge"></div>
+        <div class="dash-level-block">
+          <span class="dash-level-label font-orbitron">LEVEL</span>
+          <div class="dash-level-num font-orbitron" id="dash-level-num">1</div>
+          <p class="dash-rank-title" id="dash-rank-title"></p>
+        </div>
+        <div class="dash-xp-block">
+          <div class="dash-xp-label-row font-orbitron">
+            <span>XP</span>
+            <span id="dash-xp-frac">0 / 150</span>
+          </div>
+          <div class="dash-xp-bar">
+            <div class="dash-xp-fill" id="dash-xp-fill"></div>
+          </div>
+        </div>
+        <div class="dash-stats-row">
+          <div class="dash-stat-cell">
+            <span class="dash-stat-val font-orbitron" id="dash-streak-val">0</span>
+            <span class="dash-stat-lbl font-orbitron">🔥 STREAK</span>
+          </div>
+          <div class="dash-stat-cell">
+            <span class="dash-stat-val font-orbitron" id="dash-boss-val">0</span>
+            <span class="dash-stat-lbl font-orbitron">⚔️ BOSSES</span>
+          </div>
+          <div class="dash-stat-cell">
+            <span class="dash-stat-val font-orbitron" id="dash-task-val">0</span>
+            <span class="dash-stat-lbl font-orbitron">✓ TASKS</span>
+          </div>
+        </div>
+        <p class="dash-side-label font-orbitron">DOMAIN RADAR</p>
+        <canvas id="dash-radar-canvas" width="200" height="200" class="dash-radar-canvas"></canvas>
+        <p class="dash-side-label font-orbitron">SUBJECTS</p>
+        <div class="dash-subject-chips" id="dash-subject-chips"></div>
+        <div class="dash-daily-quote">
+          <p id="dash-sidebar-quote"></p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="dash-main" id="dash-main">
+      <div id="monster-attack-banner" class="monster-attack-banner is-hidden" aria-live="polite"></div>
+
+      <nav class="dash-tabs" id="dash-tabs" role="tablist">
+        <button type="button" class="dash-tab is-active" data-tab="tasks" role="tab">⚔️ TASKS</button>
+        <button type="button" class="dash-tab" data-tab="bosses" role="tab">🐉 BOSSES</button>
+        <button type="button" class="dash-tab" data-tab="achievements" role="tab">🏆 ACHIEVEMENTS</button>
+        <button type="button" class="dash-tab" data-tab="monsters" role="tab">👾 MONSTERS</button>
+        <button type="button" class="dash-tab" data-tab="stats" role="tab">📊 LIFE STATS</button>
+        <button type="button" class="dash-tab" data-tab="planner" role="tab">🗓️ PLANNER</button>
+        <button type="button" class="dash-tab" data-tab="study" role="tab">📖 STUDY RPG</button>
+      </nav>
+
+      <div class="dash-panels">
+        <section id="panel-tasks" class="dash-panel is-active" data-panel="tasks" role="tabpanel">
+          <div class="dash-panel-head">
+            <h2 class="dash-panel-title font-orbitron">TASKS // 任務ボード</h2>
+            <button type="button" class="btn btn-pink" id="btn-toggle-add-task">+ NEW MISSION</button>
+          </div>
+          <div id="add-task-panel" class="card dash-add-panel is-hidden">
+            <div class="form-group">
+              <label class="form-label" for="task-name">TASK NAME</label>
+              <input class="form-input" id="task-name" type="text" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-desc">DESCRIPTION</label>
+              <textarea class="form-input form-textarea" id="task-desc" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-domain">PRIMARY DOMAIN</label>
+              <select class="form-input" id="task-domain"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-subfield">SUB-FIELD</label>
+              <select class="form-input" id="task-subfield"></select>
+            </div>
+            <p class="form-label">SECONDARY DOMAINS (optional)</p>
+            <div class="chip-grid" id="task-secondary-chips"></div>
+            <div class="form-group is-hidden" id="task-subject-wrap">
+              <label class="form-label" for="task-subject">SUBJECT</label>
+              <select class="form-input" id="task-subject"></select>
+            </div>
+            <p class="form-label">XP REWARD</p>
+            <div class="chip-grid" id="task-xp-chips"></div>
+            <div class="form-group is-hidden" id="task-xp-custom-wrap">
+              <input class="form-input" id="task-xp-custom" type="number" min="1" placeholder="Custom XP" />
+            </div>
+            <p class="form-label">ESTIMATED TIME</p>
+            <div class="chip-grid" id="task-time-chips"></div>
+            <div class="form-group">
+              <label class="form-label" for="task-due">DUE (optional)</label>
+              <input class="form-input" id="task-due" type="datetime-local" />
+            </div>
+            <p class="form-label">PRIORITY</p>
+            <div class="chip-grid" id="task-priority-chips"></div>
+            <button type="button" class="btn btn-pink" id="btn-create-task">CREATE MISSION ⚡</button>
+          </div>
+          <div id="task-sections"></div>
+        </section>
+
+        <section id="panel-bosses" class="dash-panel" data-panel="bosses" role="tabpanel" hidden>
+          <div class="dash-panel-head">
+            <h2 class="dash-panel-title font-orbitron">BOSS FIGHTS // ボス戦</h2>
+            <button type="button" class="btn btn-boss-create" id="btn-toggle-add-boss">+ CREATE BOSS</button>
+          </div>
+          <div id="add-boss-panel" class="card dash-add-panel is-hidden"></div>
+          <div id="boss-active-list"></div>
+          <h3 class="dash-subtitle font-orbitron">TROPHY ROOM // トロフィールーム</h3>
+          <div id="boss-trophy-list"></div>
+        </section>
+
+        <section id="panel-achievements" class="dash-panel" data-panel="achievements" role="tabpanel" hidden>
+          <h2 class="dash-panel-title font-orbitron">ACHIEVEMENTS // 実績</h2>
+          <p class="dash-subtitle-text muted">Every action leaves a mark.</p>
+          <div id="achievements-grid" class="achievements-grid"></div>
+        </section>
+
+        <section id="panel-monsters" class="dash-panel" data-panel="monsters" role="tabpanel" hidden>
+          <h2 class="dash-panel-title font-orbitron">DISTRACTION MONSTERS // 邪魔モンスター</h2>
+          <h3 class="dash-subtitle font-orbitron">KNOWN THREATS // 既知の脅威</h3>
+          <div id="monster-bestiary" class="monster-bestiary"></div>
+          <p class="monster-stats-row font-orbitron" id="monster-stats-row"></p>
+        </section>
+
+        <section id="panel-stats" class="dash-panel" data-panel="stats" role="tabpanel" hidden>
+          <h2 class="dash-panel-title font-orbitron">YOUR EXISTENCE, IN NUMBERS // 数字で見る人生</h2>
+          <div class="life-stats-radar-wrap">
+            <canvas id="stats-radar-canvas" width="280" height="280"></canvas>
+          </div>
+          <div id="stats-domain-cards" class="stats-domain-grid"></div>
+          <div id="stats-subject-section" class="is-hidden">
+            <h3 class="dash-subtitle font-orbitron">SUBJECT MASTERY</h3>
+            <div id="stats-subject-bars"></div>
+          </div>
+          <h3 class="dash-subtitle font-orbitron">THIS WEEK</h3>
+          <div id="stats-week-cal" class="stats-week-cal"></div>
+          <h3 class="dash-subtitle font-orbitron">RECENT MISSIONS</h3>
+          <div id="stats-task-history" class="stats-history"></div>
+          <h3 class="dash-subtitle font-orbitron">OVERALL</h3>
+          <div id="stats-overall-grid" class="stats-overall-grid"></div>
+          <div id="stats-domain-highlight" class="card stats-highlight"></div>
+        </section>
+
+        <section id="panel-planner" class="dash-panel" data-panel="planner" role="tabpanel" hidden>
+          <h2 class="dash-panel-title font-orbitron">TOMORROW'S BATTLEFIELD // 明日の作戦</h2>
+          <div class="planner-nav font-orbitron">
+            <button type="button" class="btn btn-cyan btn-icon" id="planner-prev">←</button>
+            <span id="planner-date-label"></span>
+            <button type="button" class="btn btn-cyan btn-icon" id="planner-next">→</button>
+          </div>
+          <div id="planner-grid" class="planner-grid"></div>
+          <div class="planner-actions">
+            <button type="button" class="btn btn-cyan" id="planner-lock">🔒 LOCK IN PLAN</button>
+            <button type="button" class="btn btn-purple" id="planner-architect">🤖 ASK ARCHITECT FOR ROUTINE</button>
+          </div>
+          <p id="planner-architect-status" class="planner-architect-status is-hidden font-orbitron"></p>
+          <div id="planner-suggestion-chips" class="chip-grid"></div>
+          <h3 class="dash-subtitle font-orbitron">PLAN HISTORY</h3>
+          <div id="planner-history" class="planner-history"></div>
+        </section>
+
+        <section id="panel-study" class="dash-panel" data-panel="study" role="tabpanel" hidden>
+          <h2 class="dash-panel-title font-orbitron">STUDY RPG // 電脳学習</h2>
+          <p class="dash-subtitle-text muted">Your academic battlefield.</p>
+          <h3 class="dash-subtitle font-orbitron">SKILL TREE // スキルツリー</h3>
+          <div id="study-skill-grid" class="study-skill-grid"></div>
+          <div class="dash-panel-head">
+            <h3 class="dash-subtitle font-orbitron">ACADEMIC BOSSES // 学術ボス</h3>
+            <button type="button" class="btn btn-boss-create" id="btn-academic-boss">+ CREATE ACADEMIC BOSS</button>
+          </div>
+          <div id="study-boss-list"></div>
+        </section>
+      </div>
+    </main>
+
+    <div id="anticheat-modal" class="anticheat-modal is-hidden" aria-modal="true" role="dialog">
+      <div class="anticheat-modal__inner">
+        <div class="anticheat-modal__eye" aria-hidden="true">
+          <svg class="login-eye-svg" viewBox="0 0 48 48" width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="24" cy="24" rx="18" ry="11" fill="none" stroke="#00fff5" stroke-width="1.5" opacity="0.9" />
+            <circle cx="24" cy="24" r="5" fill="none" stroke="#00fff5" stroke-width="1.2" />
+            <circle cx="24" cy="24" r="2" fill="#00fff5" opacity="0.85" />
+            <path d="M6 24 Q24 8 42 24" fill="none" stroke="#00fff5" stroke-width="1" opacity="0.5" />
+            <path d="M6 24 Q24 40 42 24" fill="none" stroke="#00fff5" stroke-width="1" opacity="0.5" />
+          </svg>
+        </div>
+        <h2 class="anticheat-modal__title font-orbitron">ARCHITECT INTERROGATION</h2>
+        <p class="anticheat-modal__jp jp">審問</p>
+        <div id="anticheat-question" class="anticheat-modal__question font-orbitron">
+          <span class="anticheat-loading">ARCHITECT IS ANALYZING<span class="anticheat-dots">...</span></span>
+        </div>
+        <div class="anticheat-modal__actions">
+          <button type="button" class="btn btn-cyan" id="anticheat-honest">I ACTUALLY DID IT ✓</button>
+          <button type="button" class="btn btn-red" id="anticheat-cancel">I DIDN'T — CANCEL</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-root"></div>
+
+    <script src="app.js" defer></script>
+    <script src="dashboard.js" defer></script>
+  </body>
+</html>

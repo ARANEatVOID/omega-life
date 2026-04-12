@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMEGA LIFE — Your Life. Quantified. Weaponized.</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="home-page">
+    <div id="toast-container"></div>
+
+    <header id="site-nav" class="site-nav">
+      <a href="index.html" class="site-nav__logo">ΩMEGA</a>
+      <button
+        type="button"
+        class="site-nav__toggle"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="site-nav-links"
+      >
+        ☰
+      </button>
+      <nav class="site-nav__links" id="site-nav-links" aria-label="Main navigation">
+        <a href="index.html">HOME</a>
+        <a href="login.html">LOGIN</a>
+        <a href="signup.html">SIGN UP</a>
+      </nav>
+    </header>
+
+    <section class="hero-home" aria-label="Hero">
+      <div class="hero-home__inner">
+        <div class="hero-home__text">
+          <p class="hero-home__label jp">電脳人生 // OMEGA LIFE</p>
+          <h1 class="hero-home__title glitch">ΩMEGA LIFE</h1>
+          <p class="hero-home__line2 font-orbitron">
+            <span class="hero-home__cyan">YOUR LIFE.</span>
+            <span class="hero-home__yellow">QUANTIFIED.</span>
+            <span class="hero-home__pink">WEAPONIZED.</span>
+          </p>
+          <p class="hero-home__tagline">
+            The Game You Were Born Into. Whether You're Ready Or Not.
+          </p>
+          <div class="hero-home__cta">
+            <a class="btn btn-pink" href="signup.html">▶ START YOUR LIFE</a>
+            <a class="btn btn-cyan" href="login.html">⚡ PLAYER LOGIN</a>
+          </div>
+        </div>
+        <div class="hero-home__visual" aria-hidden="true">
+          <svg class="hero-figure-svg" viewBox="0 0 340 380" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="heroGradCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00fff5" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#00fff5" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="heroGradPink" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff2d78" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#ff2d78" stop-opacity="0" />
+              </linearGradient>
+              <filter id="heroGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <g class="hero-streams" fill="none" stroke-linecap="round">
+              <path d="M165 78 L310 22" stroke="url(#heroGradCyan)" stroke-width="2" opacity="0.85" />
+              <path d="M172 95 L318 68" stroke="#00fff5" stroke-width="1.5" opacity="0.55" />
+              <path d="M158 110 L305 118" stroke="url(#heroGradPink)" stroke-width="2" opacity="0.75" />
+              <path d="M175 135 L322 165" stroke="#ff2d78" stroke-width="1.2" opacity="0.5" />
+              <path d="M168 155 L300 210" stroke="#00fff5" stroke-width="1" opacity="0.45" />
+              <path d="M180 175 L315 255" stroke="url(#heroGradCyan)" stroke-width="1.8" opacity="0.65" />
+              <path d="M162 195 L288 290" stroke="#ff2d78" stroke-width="1" opacity="0.4" />
+              <path d="M170 215 L308 330" stroke="#00fff5" stroke-width="1.2" opacity="0.5" />
+              <path d="M155 125 L275 45" stroke="#ff2d78" stroke-width="0.8" opacity="0.35" />
+              <path d="M178 88 L292 12" stroke="#00fff5" stroke-width="0.8" opacity="0.3" />
+            </g>
+            <g class="hero-silhouette" filter="url(#heroGlow)">
+              <circle cx="118" cy="72" r="26" stroke="#e8e8ff" stroke-width="2.2" fill="none" opacity="0.9" />
+              <path
+                d="M118 98 L118 210"
+                stroke="#e8e8ff"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.9"
+              />
+              <path
+                d="M118 120 L72 175"
+                stroke="#e8e8ff"
+                stroke-width="2"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.85"
+              />
+              <path
+                d="M118 120 L168 168"
+                stroke="#e8e8ff"
+                stroke-width="2"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.85"
+              />
+              <path
+                d="M118 210 L88 310"
+                stroke="#e8e8ff"
+                stroke-width="2"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.85"
+              />
+              <path
+                d="M118 210 L148 308"
+                stroke="#e8e8ff"
+                stroke-width="2"
+                stroke-linecap="round"
+                fill="none"
+                opacity="0.85"
+              />
+            </g>
+            <g class="hero-particles" fill="#00fff5" opacity="0.35">
+              <circle cx="220" cy="48" r="2" />
+              <circle cx="260" cy="92" r="1.5" />
+              <circle cx="300" cy="140" r="2" />
+              <circle cx="285" cy="220" r="1.5" />
+              <circle cx="310" cy="300" r="2" />
+            </g>
+            <g class="hero-particles hero-particles--pink" fill="#ff2d78" opacity="0.3">
+              <circle cx="240" cy="130" r="1.5" />
+              <circle cx="295" cy="180" r="2" />
+              <circle cx="270" cy="260" r="1.5" />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker-wrap" aria-hidden="true">
+      <div class="ticker-track">
+        <span class="ticker-content">
+          YOUR COMPETITION DIDN'T TAKE A BREAK TODAY. DID YOU? // FAILURE IS NOT AN OPTION — IT'S YOUR
+          CURRENT REALITY // THE EXAM DOESN'T CARE ABOUT YOUR FEELINGS // EVERY HOUR YOU WASTE IS AN HOUR
+          YOUR RIVAL IS AHEAD // STOP WAITING FOR MOTIVATION. IT DOESN'T LIVE HERE // YOUR FUTURE SELF IS
+          WATCHING. DON'T EMBARRASS HIM // MEDIOCRITY IS A CHOICE. SO IS GREATNESS. CHOOSE // LIFE HAS NO
+          PAUSE BUTTON. NEITHER DOES YOUR ENEMY //
+        </span>
+        <span class="ticker-content" aria-hidden="true">
+          YOUR COMPETITION DIDN'T TAKE A BREAK TODAY. DID YOU? // FAILURE IS NOT AN OPTION — IT'S YOUR
+          CURRENT REALITY // THE EXAM DOESN'T CARE ABOUT YOUR FEELINGS // EVERY HOUR YOU WASTE IS AN HOUR
+          YOUR RIVAL IS AHEAD // STOP WAITING FOR MOTIVATION. IT DOESN'T LIVE HERE // YOUR FUTURE SELF IS
+          WATCHING. DON'T EMBARRASS HIM // MEDIOCRITY IS A CHOICE. SO IS GREATNESS. CHOOSE // LIFE HAS NO
+          PAUSE BUTTON. NEITHER DOES YOUR ENEMY //
+        </span>
+      </div>
+    </div>
+
+    <section class="section-home domains-section" aria-labelledby="domains-heading">
+      <div class="section-home__inner">
+        <h2 id="domains-heading" class="section-home__title font-orbitron">THE 8 BATTLEFIELDS OF EXISTENCE</h2>
+        <p class="section-home__subtitle jp">存在の8つの戦場</p>
+        <div class="domains-grid" id="domains-grid">
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--green); --di: 0"
+            data-domain-index="0"
+          >
+            <div class="domain-card__icon" aria-hidden="true">⚡</div>
+            <h3 class="domain-card__name font-orbitron">BIOLOGICAL</h3>
+            <p class="domain-card__kanji jp">肉体</p>
+            <p class="domain-card__desc">Everything your meat-body does whether you like it or not.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--purple); --di: 1"
+            data-domain-index="1"
+          >
+            <div class="domain-card__icon" aria-hidden="true">🧠</div>
+            <h3 class="domain-card__name font-orbitron">PSYCHOLOGICAL</h3>
+            <p class="domain-card__kanji jp">精神</p>
+            <p class="domain-card__desc">The chaos inside your head. The main battlefield.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--cyan); --di: 2"
+            data-domain-index="2"
+          >
+            <div class="domain-card__icon" aria-hidden="true">👥</div>
+            <h3 class="domain-card__name font-orbitron">SOCIAL</h3>
+            <p class="domain-card__kanji jp">社会</p>
+            <p class="domain-card__desc">Because humans can't just exist quietly.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--yellow); --di: 3"
+            data-domain-index="3"
+          >
+            <div class="domain-card__icon" aria-hidden="true">📚</div>
+            <h3 class="domain-card__name font-orbitron">ACADEMIC</h3>
+            <p class="domain-card__kanji jp">学習</p>
+            <p class="domain-card__desc">Where you prove what you're actually made of.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--orange); --di: 4"
+            data-domain-index="4"
+          >
+            <div class="domain-card__icon" aria-hidden="true">💴</div>
+            <h3 class="domain-card__name font-orbitron">ECONOMIC</h3>
+            <p class="domain-card__kanji jp">経済</p>
+            <p class="domain-card__desc">You need money to exist. That's just the game.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: var(--pink); --di: 5"
+            data-domain-index="5"
+          >
+            <div class="domain-card__icon" aria-hidden="true">⏱️</div>
+            <h3 class="domain-card__name font-orbitron">TIME</h3>
+            <p class="domain-card__kanji jp">時間</p>
+            <p class="domain-card__desc">The one resource you keep wasting and can't refund.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: #ff6ec7; --di: 6"
+            data-domain-index="6"
+          >
+            <div class="domain-card__icon" aria-hidden="true">🎨</div>
+            <h3 class="domain-card__name font-orbitron">CREATIVE</h3>
+            <p class="domain-card__kanji jp">創造</p>
+            <p class="domain-card__desc">Where you briefly stop being a robot.</p>
+          </article>
+          <article
+            class="domain-card card"
+            style="--domain-accent: #a0a0ff; --di: 7"
+            data-domain-index="7"
+          >
+            <div class="domain-card__icon" aria-hidden="true">🔮</div>
+            <h3 class="domain-card__name font-orbitron">EXISTENTIAL</h3>
+            <p class="domain-card__kanji jp">存在</p>
+            <p class="domain-card__desc">The why am I even doing this category.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-home features-section" aria-labelledby="features-heading">
+      <div class="section-home__inner">
+        <h2 id="features-heading" class="section-home__title font-orbitron">YOUR ARSENAL</h2>
+        <div class="features-grid">
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">⚔️</div>
+            <h3 class="feature-card__name font-orbitron">Boss Fights</h3>
+            <p class="feature-card__desc">Mock tests as boss battles. Defeat them. Earn XP.</p>
+          </article>
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">🧬</div>
+            <h3 class="feature-card__name font-orbitron">Life Domains</h3>
+            <p class="feature-card__desc">8 dimensions of your existence, tracked in real time.</p>
+          </article>
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">🏆</div>
+            <h3 class="feature-card__name font-orbitron">Achievements</h3>
+            <p class="feature-card__desc">Unlock badges for living with intention.</p>
+          </article>
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">🤖</div>
+            <h3 class="feature-card__name font-orbitron">ARCHITECT AI</h3>
+            <p class="feature-card__desc">Your brutally honest AI mentor. No sugarcoating.</p>
+          </article>
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">👾</div>
+            <h3 class="feature-card__name font-orbitron">Distraction Monsters</h3>
+            <p class="feature-card__desc">Fight YouTube, doom scroll, and anime. Literally.</p>
+          </article>
+          <article class="feature-card card">
+            <div class="feature-card__icon" aria-hidden="true">🔥</div>
+            <h3 class="feature-card__name font-orbitron">Daily Streaks</h3>
+            <p class="feature-card__desc">Never break the chain. Or face ARCHITECT.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-home leaderboard-section" aria-labelledby="leaderboard-heading">
+      <div class="section-home__inner">
+        <h2 id="leaderboard-heading" class="section-home__title font-orbitron">
+          TOP PLAYERS // <span class="jp" style="font-size: 0.85em; letter-spacing: 0.15em">トッププレイヤー</span>
+        </h2>
+        <div class="leaderboard-grid" id="leaderboard-grid"></div>
+      </div>
+    </section>
+
+    <footer class="site-footer-home">
+      <p class="site-footer-home__brand font-orbitron">ΩMEGA LIFE // <span class="jp">電脳人生</span></p>
+      <p class="site-footer-home__tag muted">Your life is the game. ARCHITECT is keeping score.</p>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMEGA LIFE — Sign Up</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="signup-page">
+    <div id="toast-container"></div>
+
+    <header id="site-nav" class="site-nav">
+      <a href="index.html" class="site-nav__logo">ΩMEGA</a>
+      <button
+        type="button"
+        class="site-nav__toggle"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="site-nav-links"
+      >
+        ☰
+      </button>
+      <nav class="site-nav__links" id="site-nav-links" aria-label="Main navigation">
+        <a href="index.html">HOME</a>
+        <a href="login.html">LOGIN</a>
+        <a href="signup.html">SIGN UP</a>
+      </nav>
+    </header>
+
+    <div id="signup-age-overlay" class="signup-age-overlay is-hidden" aria-hidden="true">
+      <div class="signup-age-overlay__inner">
+        <div class="signup-age-overlay__x" aria-hidden="true">✕</div>
+        <h2 class="signup-age-overlay__title font-orbitron">ACCESS DENIED // アクセス拒否</h2>
+        <p class="signup-age-overlay__body">
+          You are not eligible to enter this system yet, soldier. Come back when you're 13. The battlefield will still be here.
+        </p>
+        <p class="signup-age-overlay__jp jp">まだ早い — Too soon.</p>
+        <a class="btn btn-cyan" href="index.html">RETURN</a>
+      </div>
+    </div>
+
+    <main class="signup-main">
+      <div id="signup-wizard-root" class="signup-wizard-root">
+        <div class="wizard-progress" id="wizard-progress" role="presentation"></div>
+        <p class="wizard-step-label font-orbitron" id="wizard-step-label">STEP 1 OF 6 — IDENTITY CORE</p>
+
+        <div class="wizard-viewport" id="wizard-viewport" style="--wiz-step: 1">
+          <div class="wizard-track" id="wizard-track">
+            <!-- STEP 1 -->
+            <section class="wizard-step" data-step="1" aria-label="Step 1">
+              <h2 class="step-title">IDENTITY CORE // 身元確認</h2>
+              <p class="step-subtitle">Who are you, soldier? Be precise.</p>
+
+              <div class="form-group">
+                <label class="form-label" for="inp-realname">REAL NAME</label>
+                <input class="form-input" id="inp-realname" type="text" placeholder="Aryan" autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="inp-username">PLAYER TAG</label>
+                <div class="input-with-status">
+                  <input
+                    class="form-input"
+                    id="inp-username"
+                    type="text"
+                    placeholder="no spaces, min 3 chars"
+                    autocomplete="username"
+                    spellcheck="false"
+                  />
+                  <span class="input-status" id="username-status" aria-live="polite"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="inp-password">PASSWORD</label>
+                <div class="password-row">
+                  <input class="form-input" id="inp-password" type="password" autocomplete="new-password" />
+                  <button type="button" class="btn-eye" id="btn-toggle-pass" aria-label="Show password">👁</button>
+                </div>
+                <div class="pw-strength" id="pw-strength" aria-live="polite"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="inp-age">AGE</label>
+                <input class="form-input" id="inp-age" type="number" min="1" max="99" inputmode="numeric" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="inp-title">WHAT DO YOU CALL YOURSELF WHEN NO ONE'S WATCHING?</label>
+                <input
+                  class="form-input"
+                  id="inp-title"
+                  type="text"
+                  placeholder="The Unstoppable / Shadow Scholar"
+                />
+              </div>
+              <div class="wizard-nav">
+                <span></span>
+                <button type="button" class="btn btn-pink" id="btn-step1-next">NEXT →</button>
+              </div>
+            </section>
+
+            <!-- STEP 2 -->
+            <section class="wizard-step" data-step="2" aria-label="Step 2">
+              <h2 class="step-title">CHOOSE YOUR AVATAR // アバター選択</h2>
+              <p class="step-subtitle">Who do you fight as?</p>
+              <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Avatar">
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="🥷|Cyber Ninja|サイバー忍者" />
+                  <span class="avatar-card__emoji">🥷</span>
+                  <span class="avatar-card__en font-orbitron">Cyber Ninja</span>
+                  <span class="avatar-card__jp jp">サイバー忍者</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="⚔️|Ronin|浪人" />
+                  <span class="avatar-card__emoji">⚔️</span>
+                  <span class="avatar-card__en font-orbitron">Ronin</span>
+                  <span class="avatar-card__jp jp">浪人</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="🧬|Bio Hacker|バイオハッカー" />
+                  <span class="avatar-card__emoji">🧬</span>
+                  <span class="avatar-card__en font-orbitron">Bio Hacker</span>
+                  <span class="avatar-card__jp jp">バイオハッカー</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="🔮|Arcane Scholar|魔法学者" />
+                  <span class="avatar-card__emoji">🔮</span>
+                  <span class="avatar-card__en font-orbitron">Arcane Scholar</span>
+                  <span class="avatar-card__jp jp">魔法学者</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="🤖|AI Construct|AI構造体" />
+                  <span class="avatar-card__emoji">🤖</span>
+                  <span class="avatar-card__en font-orbitron">AI Construct</span>
+                  <span class="avatar-card__jp jp">AI構造体</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="🦊|Kitsune|狐" />
+                  <span class="avatar-card__emoji">🦊</span>
+                  <span class="avatar-card__en font-orbitron">Kitsune</span>
+                  <span class="avatar-card__jp jp">狐</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="👁️|The Watcher|監視者" />
+                  <span class="avatar-card__emoji">👁️</span>
+                  <span class="avatar-card__en font-orbitron">The Watcher</span>
+                  <span class="avatar-card__jp jp">監視者</span>
+                </label>
+                <label class="avatar-card card">
+                  <input type="radio" name="avatar" value="☄️|Cosmic Sage|宇宙の賢者" />
+                  <span class="avatar-card__emoji">☄️</span>
+                  <span class="avatar-card__en font-orbitron">Cosmic Sage</span>
+                  <span class="avatar-card__jp jp">宇宙の賢者</span>
+                </label>
+              </div>
+              <div class="wizard-nav">
+                <button type="button" class="btn btn-cyan btn-ghost" data-wiz-back>← BACK</button>
+                <button type="button" class="btn btn-pink" data-wiz-next>NEXT →</button>
+              </div>
+            </section>
+
+            <!-- STEP 3 -->
+            <section class="wizard-step" data-step="3" aria-label="Step 3">
+              <h2 class="step-title">CURRENT BATTLEFIELD // 現在の戦場</h2>
+              <p class="step-subtitle">ARCHITECT needs to know where you're fighting.</p>
+              <div class="life-grid" role="radiogroup" aria-label="Life field">
+                <label class="life-card card">
+                  <input type="radio" name="life-field" value="school" />
+                  <span class="life-card__icon">🏫</span>
+                  <span class="life-card__title font-orbitron">SCHOOL</span>
+                  <span class="life-card__jp jp">学校</span>
+                  <span class="life-card__line">Still in the system. The grind begins here.</span>
+                </label>
+                <label class="life-card card">
+                  <input type="radio" name="life-field" value="university" />
+                  <span class="life-card__icon">🎓</span>
+                  <span class="life-card__title font-orbitron">UNIVERSITY</span>
+                  <span class="life-card__jp jp">大学</span>
+                  <span class="life-card__line">Deeper. More chaos. Higher stakes.</span>
+                </label>
+                <label class="life-card card">
+                  <input type="radio" name="life-field" value="job" />
+                  <span class="life-card__icon">💼</span>
+                  <span class="life-card__title font-orbitron">JOB</span>
+                  <span class="life-card__jp jp">仕事</span>
+                  <span class="life-card__line">You're in the real world now. No more practice runs.</span>
+                </label>
+                <label class="life-card card">
+                  <input type="radio" name="life-field" value="retired" />
+                  <span class="life-card__icon">🌅</span>
+                  <span class="life-card__title font-orbitron">RETIRED</span>
+                  <span class="life-card__jp jp">引退</span>
+                  <span class="life-card__line">The battle was long. A new chapter begins.</span>
+                </label>
+              </div>
+              <div class="wizard-nav">
+                <button type="button" class="btn btn-cyan btn-ghost" data-wiz-back>← BACK</button>
+                <button type="button" class="btn btn-pink" data-wiz-next>NEXT →</button>
+              </div>
+            </section>
+
+            <!-- STEP 4 -->
+            <section class="wizard-step wizard-step--wide" data-step="4" aria-label="Step 4">
+              <div id="panel-school" class="field-panel is-hidden">
+                <h2 class="step-title">SCHOOL DOSSIER // 学校ファイル</h2>
+                <p class="step-subtitle">Lock in your academic war zone.</p>
+                <p class="form-label">GRADE</p>
+                <div class="grade-row" role="radiogroup" aria-label="Grade">
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="6" /><span class="grade-num">6</span><span class="grade-rank">初級戦士 Novice</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="7" /><span class="grade-num">7</span><span class="grade-rank">見習い Apprentice</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="8" /><span class="grade-num">8</span><span class="grade-rank">修行者 Trainee</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="9" /><span class="grade-num">9</span><span class="grade-rank">上級者 Advanced</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="10" /><span class="grade-num">10</span><span class="grade-rank">上級士 Senior</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="11" /><span class="grade-num">11</span><span class="grade-rank">精鋭 Elite</span></label>
+                  <label class="grade-card card"><input type="radio" name="school-grade" value="12" /><span class="grade-num">12</span><span class="grade-rank">最終決戦 Final Battle</span></label>
+                </div>
+                <p class="form-label" style="margin-top: 1.25rem">SELECT YOUR ARSENAL (min 1)</p>
+                <div class="chip-grid" id="school-subject-chips"></div>
+                <div class="form-group is-hidden" id="school-custom-subject-row">
+                  <label class="form-label" for="inp-school-custom-subject">ADD CUSTOM SUBJECT</label>
+                  <div class="add-row">
+                    <input class="form-input" id="inp-school-custom-subject" type="text" placeholder="Subject name" />
+                    <button type="button" class="btn btn-yellow" id="btn-school-add-subject">+ ADD</button>
+                  </div>
+                </div>
+                <div id="school-custom-chips" class="chip-grid"></div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-school-name">CURRENT SCHOOL NAME</label>
+                  <input class="form-input" id="inp-school-name" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-school-city">CITY / LOCATION</label>
+                  <input class="form-input" id="inp-school-city" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-school-dream-college">DREAM COLLEGE</label>
+                  <input class="form-input" id="inp-school-dream-college" type="text" placeholder="IIT Bombay / MIT / Haven't decided yet" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-school-gpa">CURRENT GPA / PERCENTAGE (optional)</label>
+                  <input class="form-input" id="inp-school-gpa" type="number" step="any" placeholder="Optional" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sel-school-challenge">BIGGEST ACADEMIC CHALLENGE</label>
+                  <select class="form-input" id="sel-school-challenge">
+                    <option value="">Select...</option>
+                    <option>Concentration</option>
+                    <option>Time Management</option>
+                    <option>Understanding Concepts</option>
+                    <option>Test Anxiety</option>
+                    <option>Lack of Resources</option>
+                    <option>Peer Pressure</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <p class="form-label">COMPETITIVE EXAMS</p>
+                <div class="chip-grid" id="exam-chips"></div>
+              </div>
+
+              <div id="panel-university" class="field-panel is-hidden">
+                <h2 class="step-title">UNIVERSITY DOSSIER // 大学ファイル</h2>
+                <p class="step-subtitle">Higher stakes. Higher voltage.</p>
+                <div class="form-group">
+                  <label class="form-label" for="inp-uni-name">UNIVERSITY NAME</label>
+                  <input class="form-input" id="inp-uni-name" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-uni-city">CITY / COUNTRY</label>
+                  <input class="form-input" id="inp-uni-city" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-uni-major">FIELD OF STUDY / MAJOR</label>
+                  <input class="form-input" id="inp-uni-major" type="text" />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-total-years">TOTAL YEARS (1–6)</label>
+                    <input class="form-input" id="inp-uni-total-years" type="number" min="1" max="6" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-current-year">CURRENT YEAR (1–6)</label>
+                    <input class="form-input" id="inp-uni-current-year" type="number" min="1" max="6" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-uni-cgpa">CURRENT CGPA (optional)</label>
+                  <input class="form-input" id="inp-uni-cgpa" type="number" step="any" />
+                </div>
+                <p class="form-label">SUBJECTS (min 1)</p>
+                <div class="chip-grid" id="uni-quick-chips"></div>
+                <div class="add-row form-group">
+                  <input class="form-input" id="inp-uni-custom-subject" type="text" placeholder="Add subject" />
+                  <button type="button" class="btn btn-yellow" id="btn-uni-add-subject">+ ADD</button>
+                </div>
+                <div id="uni-subject-chips" class="chip-grid"></div>
+                <p class="form-label">AFTER GRADUATION I WANT TO</p>
+                <div class="after-grad-grid" role="radiogroup">
+                  <label class="after-card card"><input type="radio" name="after-grad" value="job" /><span>💼 Get a Job</span></label>
+                  <label class="after-card card"><input type="radio" name="after-grad" value="business" /><span>🚀 Start a Business</span></label>
+                  <label class="after-card card"><input type="radio" name="after-grad" value="studies" /><span>🎓 Further Studies</span></label>
+                  <label class="after-card card"><input type="radio" name="after-grad" value="unsure" /><span>🤷 Not sure yet</span></label>
+                </div>
+                <div id="uni-extra-job" class="is-hidden">
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-dream-job">DREAM JOB TITLE</label>
+                    <input class="form-input" id="inp-uni-dream-job" type="text" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-dream-company">DREAM COMPANY</label>
+                    <input class="form-input" id="inp-uni-dream-company" type="text" />
+                  </div>
+                </div>
+                <div id="uni-extra-business" class="is-hidden">
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-business">INDUSTRY / TYPE OF BUSINESS</label>
+                    <input class="form-input" id="inp-uni-business" type="text" />
+                  </div>
+                </div>
+                <div id="uni-extra-studies" class="is-hidden">
+                  <div class="form-group">
+                    <label class="form-label" for="inp-uni-further">TARGET PROGRAM / UNIVERSITY</label>
+                    <input class="form-input" id="inp-uni-further" type="text" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-uni-grad-year">EXPECTED GRADUATION YEAR</label>
+                  <input class="form-input" id="inp-uni-grad-year" type="number" min="2000" max="2100" />
+                </div>
+                <p class="form-label">INTERNSHIP STATUS</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="uni-internship"></div>
+                <p class="form-label">LIVING SITUATION</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="uni-living"></div>
+                <p class="form-label">BIGGEST CHALLENGE (multi)</p>
+                <div class="chip-grid" id="uni-challenge-chips"></div>
+              </div>
+
+              <div id="panel-job" class="field-panel is-hidden">
+                <h2 class="step-title">CAREER DOSSIER // 仕事ファイル</h2>
+                <p class="step-subtitle">The arena of paychecks and pressure.</p>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-title">JOB TITLE / ROLE</label>
+                  <input class="form-input" id="inp-job-title" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-company">COMPANY NAME</label>
+                  <input class="form-input" id="inp-job-company" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sel-job-industry">INDUSTRY</label>
+                  <select class="form-input" id="sel-job-industry">
+                    <option value="">Select...</option>
+                    <option>Technology</option>
+                    <option>Finance</option>
+                    <option>Healthcare</option>
+                    <option>Education</option>
+                    <option>Marketing</option>
+                    <option>Manufacturing</option>
+                    <option>Media &amp; Entertainment</option>
+                    <option>Government</option>
+                    <option>Retail</option>
+                    <option>Freelance</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-years">YEARS OF EXPERIENCE</label>
+                  <input class="form-input" id="inp-job-years" type="number" min="0" max="80" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sel-job-salary">CURRENT SALARY RANGE</label>
+                  <select class="form-input" id="sel-job-salary">
+                    <option value="">Prefer not to say</option>
+                    <option>&lt;3 LPA</option>
+                    <option>3-6 LPA</option>
+                    <option>6-10 LPA</option>
+                    <option>10-20 LPA</option>
+                    <option>20-50 LPA</option>
+                    <option>50+ LPA</option>
+                  </select>
+                </div>
+                <p class="form-label">EMPLOYMENT TYPE</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="job-employment"></div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-dream-title">DREAM JOB TITLE</label>
+                  <input class="form-input" id="inp-job-dream-title" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-dream-company">DREAM COMPANY</label>
+                  <input class="form-input" id="inp-job-dream-company" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sel-job-dream-salary">DREAM SALARY RANGE</label>
+                  <select class="form-input" id="sel-job-dream-salary">
+                    <option value="">Prefer not to say</option>
+                    <option>&lt;3 LPA</option>
+                    <option>3-6 LPA</option>
+                    <option>6-10 LPA</option>
+                    <option>10-20 LPA</option>
+                    <option>20-50 LPA</option>
+                    <option>50+ LPA</option>
+                  </select>
+                </div>
+                <p class="form-label">TIMELINE TO ACHIEVE</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="job-timeline"></div>
+                <p class="form-label">BUILDING SIDE PROJECTS?</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="job-side"></div>
+                <div class="form-group is-hidden" id="job-side-desc-wrap">
+                  <label class="form-label" for="inp-job-side-desc">DESCRIBE</label>
+                  <input class="form-input" id="inp-job-side-desc" type="text" />
+                </div>
+                <p class="form-label">BIGGEST CHALLENGE (multi)</p>
+                <div class="chip-grid" id="job-challenge-chips"></div>
+                <p class="form-label">WANT TO START OWN BUSINESS?</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="job-startup"></div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-job-upskill">UPSKILLING GOALS (optional)</label>
+                  <input class="form-input" id="inp-job-upskill" type="text" />
+                </div>
+              </div>
+
+              <div id="panel-retired" class="field-panel is-hidden">
+                <h2 class="step-title">NEW CHAPTER // 新しい章</h2>
+                <p class="step-subtitle">Different battlefield. Same discipline.</p>
+                <div class="form-group">
+                  <label class="form-label" for="inp-ret-prof">PREVIOUS PROFESSION</label>
+                  <input class="form-input" id="inp-ret-prof" type="text" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-ret-years-worked">YEARS WORKED</label>
+                  <input class="form-input" id="inp-ret-years-worked" type="number" min="0" max="80" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sel-ret-industry">INDUSTRY</label>
+                  <select class="form-input" id="sel-ret-industry">
+                    <option value="">Select...</option>
+                    <option>Technology</option>
+                    <option>Finance</option>
+                    <option>Healthcare</option>
+                    <option>Education</option>
+                    <option>Marketing</option>
+                    <option>Manufacturing</option>
+                    <option>Media &amp; Entertainment</option>
+                    <option>Government</option>
+                    <option>Retail</option>
+                    <option>Freelance</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-ret-age">RETIRED AT WHAT AGE</label>
+                  <input class="form-input" id="inp-ret-age" type="number" min="1" max="120" />
+                </div>
+                <p class="form-label">WHAT DO YOU WANT TO DO NOW? (multi)</p>
+                <div class="chip-grid" id="ret-goal-chips"></div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-ret-unfulfilled">SOMETHING ALWAYS WANTED TO DO? (optional)</label>
+                  <input class="form-input" id="inp-ret-unfulfilled" type="text" />
+                </div>
+                <p class="form-label">HEALTH GOALS TO TRACK?</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="ret-health"></div>
+                <div class="form-group is-hidden" id="ret-health-text-wrap">
+                  <label class="form-label" for="inp-ret-health-text">DESCRIBE HEALTH GOALS</label>
+                  <input class="form-input" id="inp-ret-health-text" type="text" />
+                </div>
+                <p class="form-label">MANAGING FINANCES ACTIVELY?</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="ret-finance"></div>
+                <p class="form-label">WANT ARCHITECT TO HELP WITH (multi)</p>
+                <div class="chip-grid" id="ret-arch-chips"></div>
+                <p class="form-label">FAMILY SITUATION</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="ret-family"></div>
+                <p class="form-label">MENTORING ANYONE?</p>
+                <div class="chip-grid chip-grid--radio" data-radio-group="ret-mentor"></div>
+                <div class="form-group">
+                  <label class="form-label" for="inp-ret-legacy">LEGACY GOAL (optional)</label>
+                  <input class="form-input" id="inp-ret-legacy" type="text" placeholder="Optional. But worth thinking about." />
+                </div>
+              </div>
+
+              <div class="wizard-nav">
+                <button type="button" class="btn btn-cyan btn-ghost" data-wiz-back>← BACK</button>
+                <button type="button" class="btn btn-pink" data-wiz-next>NEXT →</button>
+              </div>
+            </section>
+
+            <!-- STEP 5 -->
+            <section class="wizard-step" data-step="5" aria-label="Step 5">
+              <h2 class="step-title">RANK YOUR BATTLEFIELDS // 優先順位</h2>
+              <p class="step-subtitle">Tell ARCHITECT what matters most right now. Drag to reorder.</p>
+              <ul class="domain-sort-list" id="domain-sort-list"></ul>
+              <div class="wizard-nav">
+                <button type="button" class="btn btn-cyan btn-ghost" data-wiz-back>← BACK</button>
+                <button type="button" class="btn btn-pink" data-wiz-next>NEXT →</button>
+              </div>
+            </section>
+
+            <!-- STEP 6 -->
+            <section class="wizard-step" data-step="6" aria-label="Step 6">
+              <h2 class="step-title">BRIEF ARCHITECT // 自己申告</h2>
+              <p class="step-subtitle">Tell ARCHITECT your situation. He doesn't judge. He uses it.</p>
+              <div class="form-group">
+                <label class="form-label" for="inp-briefing">TRANSMISSION</label>
+                <textarea
+                  class="form-input form-textarea"
+                  id="inp-briefing"
+                  maxlength="500"
+                  rows="6"
+                  placeholder="Tell ARCHITECT anything. Your situation, struggles, goals, what keeps you up at night, what you're running toward or away from."
+                ></textarea>
+                <p class="char-counter font-orbitron" id="briefing-counter">0 / 500</p>
+              </div>
+              <div class="summary-card card" id="signup-summary-card">
+                <div class="summary-card__row">
+                  <span class="summary-card__emoji" id="sum-avatar">—</span>
+                  <div>
+                    <div class="summary-card__name font-orbitron" id="sum-name">—</div>
+                    <div class="summary-card__tag muted" id="sum-tag">—</div>
+                  </div>
+                </div>
+                <div class="summary-card__badge font-orbitron" id="sum-field">—</div>
+                <div class="summary-card__detail muted" id="sum-detail">—</div>
+                <div class="summary-card__domains font-orbitron" id="sum-domains">—</div>
+              </div>
+              <button type="button" class="btn btn-pink btn-block btn-lg" id="btn-initialize-player">INITIALIZE PLAYER ⚡</button>
+              <div class="wizard-nav" style="margin-top: 1rem">
+                <button type="button" class="btn btn-cyan btn-ghost" data-wiz-back>← BACK</button>
+                <span></span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="app.js" defer></script>
+    <script src="signup-wizard.js" defer></script>
+  </body>
+</html>

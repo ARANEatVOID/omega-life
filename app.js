@@ -105,21 +105,43 @@ function createToastContainer() {
 
 // Gemini API
 async function callArchitect(systemPrompt, history = [], userMessage) {
-  const contents = [
-    ...history,
-    { role: "user", parts: [{ text: userMessage }] },
-  ];
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      generationConfig: { maxOutputTokens: 1024, temperature: 0.85 },
-    }),
-  });
-  const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
+  try {
+    const contents = [
+      ...history,
+      { role: "user", parts: [{ text: userMessage }] },
+    ];
+
+    const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        generationConfig: { maxOutputTokens: 1024, temperature: 0.85 },
+      }),
+    });
+
+    const data = await response.json();
+    console.log("FULL ARCHITECT RESPONSE:", data);
+
+    // ✅ Safe handling
+    if (data?.candidates?.length > 0) {
+      return data.candidates[0].content.parts[0].text;
+    }
+
+    // ❌ API returned error
+    if (data?.error) {
+      console.error("ARCHITECT API ERROR:", data.error);
+      return "⚠️ " + data.error.message;
+    }
+
+    // 🤡 Unexpected format
+    return "⚠️ No valid response from ARCHITECT.";
+
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    return "⚠️ Network error. Try again.";
+  }
 }
 
 async function callArchitectOnce(prompt, maxOutputTokens = 128) {

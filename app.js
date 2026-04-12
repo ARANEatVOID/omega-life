@@ -1,4 +1,4 @@
-const GEMINI_API_KEY = "AIzaSyCM1WvOLmXIFugYTzaRI2ELrzL04OpVzt8";
+const GEMINI_API_KEY = "AIzaSyD2uKh1tSN66IgrhgVBJs5pstxt9JfJ8j0";
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=";
 // Storage helpers
 function getPlayer() {

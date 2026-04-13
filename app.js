@@ -1,6 +1,11 @@
-const GEMINI_API_KEY = "AIzaSyDG4th_NpHftOymUAq8w1KZMxkt8i4xN8Y";
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=";
-// Storage helpers
+const OPENROUTER_API_KEY = "YOUR_OPENROUTER_KEY_HERE";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct";
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STORAGE HELPERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function getPlayer() {
   const current = getCurrentUser();
   let data;
@@ -27,14 +32,21 @@ function setCurrentUser(username) {
 }
 
 function getAllPlayers() {
-  return JSON.parse(localStorage.getItem("omegaPlayers")) || {};
+  try {
+    return JSON.parse(localStorage.getItem("omegaPlayers")) || {};
+  } catch {
+    return {};
+  }
 }
 
 function saveAllPlayers(data) {
   localStorage.setItem("omegaPlayers", JSON.stringify(data));
 }
 
-// XP system
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// XP SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function awardXP(amount, domains = [], subject = null) {
   const player = getPlayer();
   if (!player) return;
@@ -56,7 +68,10 @@ function awardXP(amount, domains = [], subject = null) {
   checkAchievements();
 }
 
-// Level up overlay
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// LEVEL UP OVERLAY
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function triggerLevelUp(level) {
   const titles = {
     1: "学生 Student",
@@ -76,12 +91,21 @@ function triggerLevelUp(level) {
       .find(([l]) => level >= Number(l))?.[1] || "学生 Student";
   const overlay = document.createElement("div");
   overlay.className = "levelup-overlay";
-  overlay.innerHTML = `<div class="levelup-content"><div class="levelup-jp">レベルアップ</div><div class="levelup-text">LEVEL UP</div><div class="levelup-num">${level}</div><div class="levelup-title">${title}</div></div>`;
+  overlay.innerHTML = `
+    <div class="levelup-content">
+      <div class="levelup-jp">レベルアップ</div>
+      <div class="levelup-text">LEVEL UP</div>
+      <div class="levelup-num">${level}</div>
+      <div class="levelup-title">${title}</div>
+    </div>`;
   document.body.appendChild(overlay);
   setTimeout(() => overlay.remove(), 2500);
 }
 
-// Toast system
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TOAST SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function showToast(message, type = "success") {
   const container =
     document.getElementById("toast-container") || createToastContainer();
@@ -103,73 +127,52 @@ function createToastContainer() {
   return c;
 }
 
-// Gemini API
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OPENROUTER API
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 async function callArchitect(systemPrompt, history = [], userMessage) {
-  try {
-    const contents = [
-      ...history,
-      { role: "user", parts: [{ text: userMessage }] },
-    ];
+  const messages = [];
 
-    const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents,
-        generationConfig: { maxOutputTokens: 1024, temperature: 0.85 },
-      }),
-    });
-
-    const data = await response.json();
-    console.log("FULL ARCHITECT RESPONSE:", data);
-
-    // ✅ Safe handling
-    if (data?.candidates?.length > 0) {
-      return data.candidates[0].content.parts[0].text;
-    }
-
-    // ❌ API returned error
-    if (data?.error) {
-      console.error("ARCHITECT API ERROR:", data.error);
-      return "⚠️ " + data.error.message;
-    }
-
-    // 🤡 Unexpected format
-    return "⚠️ No valid response from ARCHITECT.";
-
-  } catch (err) {
-    console.error("FETCH ERROR:", err);
-    return "⚠️ Network error. Try again.";
+  if (systemPrompt) {
+    messages.push({ role: "system", content: systemPrompt });
   }
-}
 
-async function callArchitectOnce(prompt, maxOutputTokens = 128) {
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
+  history.forEach((msg) => {
+    const role = msg.role === "model" ? "assistant" : msg.role;
+    const content = msg.parts ? msg.parts[0].text : msg.content;
+    messages.push({ role, content });
+  });
+
+  messages.push({ role: "user", content: userMessage });
+
+  const response = await fetch(OPENROUTER_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + OPENROUTER_API_KEY,
+      "HTTP-Referer": "http://127.0.0.1:5500",
+      "X-Title": "OMEGA LIFE",
+    },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens, temperature: 0.6 },
+      model: OPENROUTER_MODEL,
+      messages: messages,
+      max_tokens: 1024,
+      temperature: 0.85,
     }),
   });
+
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error(data?.error?.message || "Empty response");
-  return text;
+
+  if (data.error) {
+    throw new Error(data.error.message || "OpenRouter API error");
+  }
+
+  return data.choices[0].message.content;
 }
 
-async function callArchitectText(prompt, maxOutputTokens = 1024) {
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens, temperature: 0.75 },
-    }),
-  });
-  const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+async function callArchitectOnce(prompt) {
+  return await callArchitect("", [], prompt);
 }
 
 async function fetchSubjectEmoji(subjectName) {
@@ -177,8 +180,7 @@ async function fetchSubjectEmoji(subjectName) {
   if (!safe) return "📚";
   try {
     const raw = await callArchitectOnce(
-      `Return ONLY one single emoji that best represents this academic subject. Nothing else, just the emoji: ${safe}`,
-      64
+      `Return ONLY one single emoji that best represents this academic subject. Nothing else, just the emoji: ${safe}`
     );
     const t = (raw || "").trim();
     const m = t.match(/\p{Extended_Pictographic}/u);
@@ -188,7 +190,10 @@ async function fetchSubjectEmoji(subjectName) {
   }
 }
 
-// Build ARCHITECT system prompt from player data
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ARCHITECT SYSTEM PROMPT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function buildArchitectPrompt() {
   const p = getPlayer();
   if (!p) return "";
@@ -201,6 +206,7 @@ function buildArchitectPrompt() {
     .slice(-5)
     .map((t) => t.name)
     .join(", ");
+
   let fieldContext = "";
   if (p.lifeField === "school")
     fieldContext = `Grade ${p.grade} at ${p.schoolName}, targeting ${p.dreamCollege}, subjects: ${(p.subjects || []).map((s) => s.name).join(", ")}`;
@@ -210,14 +216,19 @@ function buildArchitectPrompt() {
     fieldContext = `${p.jobTitle} at ${p.company}, ${p.yearsExp} yrs exp, targeting ${p.dreamJobTitle}`;
   else if (p.lifeField === "retired")
     fieldContext = `Former ${p.previousProfession}, now focused on ${(p.retirementGoals || []).join(", ")}`;
+
   return `You are ARCHITECT — an AI mentor embedded in OMEGA LIFE, a gamified life operating system. You are blunt, intelligent, and deeply analytical. You do not sugarcoat. Ever. You speak in short, sharp, precise sentences. You are not cruel — you are honest. You address the user as ${p.realName} occasionally for impact. You know everything about them: Age: ${p.age} | Life field: ${p.lifeField} | ${fieldContext} | Self-given title: "${p.title}" | Domain priorities: ${(p.domainPriorities || []).join(", ")} | Biggest struggle: "${p.architectBriefing}" | Level: ${p.level} | XP: ${p.xp} | Streak: ${p.streak} days | Strongest domain: ${strongest} | Weakest domain: ${weakest} | Recent tasks: ${recentTasks}. You help with life advice, study help, math, science, facts, research, routine building, goal setting, mental clarity. You NEVER refuse a genuine question. Respond in the same language the user writes in. Occasionally drop one Japanese word for atmosphere with inline translation. Keep responses concise and impactful. No filler. No cheerleading. You are their most honest advisor. Not their friend. Their ARCHITECT.`;
 }
 
-// Check achievements
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ACHIEVEMENTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function checkAchievements() {
   const p = getPlayer();
   if (!p) return;
   if (!Array.isArray(p.achievements)) p.achievements = [];
+
   const unlock = (id, name) => {
     if (!p.achievements.includes(id)) {
       p.achievements.push(id);
@@ -225,6 +236,7 @@ function checkAchievements() {
       showToast(`🏆 ACHIEVEMENT UNLOCKED: ${name}`, "success");
     }
   };
+
   const dt = p.domainsTasked || {};
   if (dt.biological) unlock("body_check", "BODY CHECK");
   if (dt.psychological) unlock("mind_games", "MIND GAMES");
@@ -244,6 +256,7 @@ function checkAchievements() {
   if (p.level >= 25) unlock("cyber_god", "電脳神");
   if (p.level >= 50) unlock("omega_rank", "OMEGA");
   if (p.tasksCompleted >= 10) unlock("scholar", "SCHOLAR");
+
   if (
     p.bossesDefeated >= 1 &&
     (p.bosses || []).find((b) => b.difficulty === "legendary" && b.defeated)
@@ -260,7 +273,9 @@ function checkAchievements() {
     unlock("perfect_day", "PERFECT DAY");
 
   const subjXp = p.subjectXP || {};
-  const lvl3Subs = Object.values(subjXp).filter((x) => Math.floor(x / 50) + 1 >= 3);
+  const lvl3Subs = Object.values(subjXp).filter(
+    (x) => Math.floor(x / 50) + 1 >= 3
+  );
   if (lvl3Subs.length >= 3) unlock("cyber_scholar", "CYBER SCHOLAR");
 
   const dxp = p.domainXP || {};
@@ -273,17 +288,18 @@ function checkAchievements() {
 
   if (p.trustArchitect) unlock("trust_architect", "TRUST THE ARCHITECT");
   if (p.tacticianUnlocked) unlock("tactician", "TACTICIAN");
-  if ((p.monstersResisted || 0) >= 5)
-    unlock("monster_tamer", "MONSTER TAMER");
-  if ((p.monstersDefeated || 0) >= 10)
-    unlock("counter_striker", "COUNTER-STRIKER");
+  if ((p.monstersResisted || 0) >= 5) unlock("monster_tamer", "MONSTER TAMER");
+  if ((p.monstersDefeated || 0) >= 10) unlock("counter_striker", "COUNTER-STRIKER");
   if (p.nightOwlUnlocked) unlock("night_owl", "NIGHT OWL");
   if (p.earlyRiserUnlocked) unlock("early_riser", "EARLY RISER");
 
   savePlayer(p);
 }
 
-// Streak updater
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STREAK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function updateStreak() {
   const p = getPlayer();
   if (!p) return;
@@ -293,7 +309,7 @@ function updateStreak() {
   const yesterday = new Date(Date.now() - 86400000).toDateString();
   if (last === yesterday) {
     p.streak = (p.streak || 0) + 1;
-  } else if (last !== today) {
+  } else {
     p.streak = 1;
   }
   p.lastActive = today;
@@ -301,7 +317,10 @@ function updateStreak() {
   savePlayer(p);
 }
 
-// Init kanji drift effect
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// KANJI DRIFT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 function initKanji() {
   const kanji = "電脳人生力夢戦魂道光影命".split("");
   const container = document.createElement("div");
@@ -310,53 +329,190 @@ function initKanji() {
   for (let i = 0; i < 12; i++) {
     const el = document.createElement("span");
     el.textContent = kanji[Math.floor(Math.random() * kanji.length)];
-    el.style.cssText = `position:absolute;font-family:'Noto Sans JP';font-size:${Math.random() * 20 + 12}px;color:var(--cyan);opacity:0.06;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation:kanjiFloat ${Math.random() * 15 + 10}s linear infinite;animation-delay:-${Math.random() * 15}s;`;
+    el.style.cssText = `position:absolute;font-family:'Noto Sans JP';font-size:${
+      Math.random() * 20 + 12
+    }px;color:var(--cyan);opacity:0.06;left:${
+      Math.random() * 100
+    }%;top:${Math.random() * 100}%;animation:kanjiFloat ${
+      Math.random() * 15 + 10
+    }s linear infinite;animation-delay:-${Math.random() * 15}s;`;
     container.appendChild(el);
   }
   document.body.appendChild(container);
 }
 
-function initDashboardPage() {
-  const levelEl = document.getElementById("dash-level");
-  if (!levelEl) return;
-  const p = getPlayer();
-  const emptyEl = document.getElementById("dash-empty");
-  if (p) {
-    if (emptyEl) emptyEl.style.display = "none";
-    const xpEl = document.getElementById("dash-xp");
-    const streakEl = document.getElementById("dash-streak");
-    if (levelEl) levelEl.textContent = String(p.level ?? 1);
-    if (xpEl) xpEl.textContent = String(p.xp ?? 0);
-    if (streakEl) streakEl.textContent = String(p.streak ?? 0);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// KATAKANA RAIN (login page)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const KATAKANA_RAIN_CHARS =
+  "アイウエオカキクケコサシスセソタチツテトナニヌネノ".split("");
+
+function initKatakanaRain() {
+  const canvas = document.getElementById("katakana-rain");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  let w, h, fontSize, columnCount, speeds, heads, colChars;
+
+  function pickChar() {
+    return KATAKANA_RAIN_CHARS[
+      Math.floor(Math.random() * KATAKANA_RAIN_CHARS.length)
+    ];
   }
+
+  function layout() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    fontSize = 15;
+    columnCount = Math.max(1, Math.ceil(w / fontSize));
+    speeds = Array.from({ length: columnCount }, () => 0.5 + Math.random() * 2.8);
+    heads = Array.from({ length: columnCount }, () => Math.random() * h);
+    colChars = Array.from({ length: columnCount }, () => pickChar());
+  }
+
+  layout();
+  window.addEventListener("resize", layout);
+
+  function frame() {
+    ctx.fillStyle = "rgba(7, 8, 15, 0.22)";
+    ctx.fillRect(0, 0, w, h);
+    ctx.font = `${fontSize}px "Noto Sans JP", sans-serif`;
+    ctx.textAlign = "center";
+    for (let i = 0; i < columnCount; i++) {
+      const x = i * fontSize + fontSize / 2;
+      ctx.fillStyle = "rgba(0, 255, 245, 0.15)";
+      ctx.fillText(colChars[i], x, heads[i]);
+      heads[i] += speeds[i];
+      if (heads[i] > h + fontSize) {
+        heads[i] = -fontSize * Math.random();
+        colChars[i] = pickChar();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
 }
 
-function initArchitectPage() {
-  const btn = document.getElementById("arch-send");
-  const input = document.getElementById("arch-input");
-  const out = document.getElementById("arch-out");
-  if (!btn || !input || !out) return;
-  btn.addEventListener("click", async () => {
-    const text = input.value.trim();
-    if (!text) {
-      showToast("Enter a message.", "warning");
-      return;
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// LOGIN
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function runLogin() {
+  const userEl = document.getElementById("login-username");
+  const passEl = document.getElementById("login-password");
+  const errEl = document.getElementById("login-error");
+  const card = document.getElementById("login-card");
+  const btn = document.getElementById("login-submit");
+
+  if (!userEl || !passEl || !errEl) return;
+
+  const user = userEl.value.trim();
+  const pass = passEl.value;
+
+  function showError(detail) {
+    errEl.innerHTML = `<span class="login-error__line1">ACCESS DENIED // アクセス拒否</span><span class="login-error__line2">${detail}</span>`;
+    errEl.classList.remove("is-hidden");
+    card?.classList.remove("login-card--shake");
+    void card?.offsetWidth;
+    card?.classList.add("login-card--shake");
+  }
+
+  function clearError() {
+    errEl.classList.add("is-hidden");
+    errEl.innerHTML = "";
+    card?.classList.remove("login-card--shake");
+  }
+
+  clearError();
+
+  if (!user || !pass) {
+    showError("Fields cannot be empty, soldier.");
+    return;
+  }
+
+  const all = getAllPlayers();
+  let storageKey = null;
+  let player = null;
+
+  for (const [k, p] of Object.entries(all)) {
+    if (!p || typeof p !== "object") continue;
+    const tag = p.username != null ? String(p.username) : k;
+    if (tag.toLowerCase() === user.toLowerCase()) {
+      storageKey = k;
+      player = p;
+      break;
     }
-    if (GEMINI_API_KEY === "YOUR_KEY_HERE") {
-      showToast("Set GEMINI_API_KEY in app.js", "error");
-      return;
-    }
-    out.textContent = "…";
-    try {
-      const system = buildArchitectPrompt();
-      const reply = await callArchitect(system, [], text);
-      out.textContent = reply || "(empty response)";
-    } catch (e) {
-      out.textContent = String(e.message || e);
-      showToast("Request failed", "error");
-    }
+  }
+
+  if (!player || storageKey == null) {
+    showError("No player found with that tag.");
+    return;
+  }
+
+  if (player.password !== pass) {
+    showError("Wrong password. Try again.");
+    return;
+  }
+
+  const loginUsername =
+    player.username != null ? String(player.username) : storageKey;
+  player.username = loginUsername;
+  savePlayer(player);
+  setCurrentUser(loginUsername);
+
+  if (btn) {
+    btn.textContent = "AUTHENTICATED ✓";
+    btn.classList.add("btn-login-success");
+    btn.disabled = true;
+  }
+
+  const redirect =
+    localStorage.getItem("redirectAfterLogin") || "dashboard.html";
+  localStorage.removeItem("redirectAfterLogin");
+  setTimeout(() => {
+    window.location.href = redirect;
+  }, 500);
+}
+
+function initLoginPage() {
+  if (!document.getElementById("login-username")) return;
+
+  initKatakanaRain();
+
+  document
+    .getElementById("login-toggle-pass")
+    ?.addEventListener("click", () => {
+      const inp = document.getElementById("login-password");
+      if (!inp) return;
+      inp.type = inp.type === "password" ? "text" : "password";
+    });
+
+  document
+    .getElementById("login-submit")
+    ?.addEventListener("click", runLogin);
+
+  ["login-username", "login-password"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") runLogin();
+    });
+  });
+
+  ["login-username", "login-password"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => {
+      document.getElementById("login-error")?.classList.add("is-hidden");
+      document
+        .getElementById("login-card")
+        ?.classList.remove("login-card--shake");
+    });
   });
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// HOMEPAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function initHomePage() {
   const nav = document.getElementById("site-nav");
@@ -404,38 +560,23 @@ function initHomePage() {
       return data;
     })
     .sort((a, b) => (b.xp || 0) - (a.xp || 0));
+
   const top = rows.slice(0, 3);
   const ghostCount = Math.max(0, 3 - top.length);
+  const rankNeon = ["var(--yellow)", "var(--cyan)", "var(--pink)"];
 
   grid.replaceChildren();
 
-  const rankNeon = [
-    "var(--yellow)",
-    "var(--cyan)",
-    "var(--pink)",
-  ];
-
   top.forEach((p, i) => {
-    const rank = i + 1;
     const card = document.createElement("article");
     card.className = "leader-card card";
-    const emoji = document.createElement("div");
-    emoji.className = "leader-card__avatar";
-    emoji.textContent = p.avatar || "🎮";
-    const rankEl = document.createElement("div");
-    rankEl.className = "leader-card__rank font-orbitron";
-    rankEl.textContent = String(rank);
-    rankEl.style.color = rankNeon[i] || rankNeon[2];
-    const body = document.createElement("div");
-    body.className = "leader-card__body";
-    const tag = document.createElement("div");
-    tag.className = "leader-card__tag font-orbitron";
-    tag.textContent = p.title || p.realName || p.username || "???";
-    const meta = document.createElement("div");
-    meta.className = "leader-card__meta muted";
-    meta.textContent = `LV ${p.level ?? 1}  ·  ${p.xp ?? 0} XP`;
-    body.append(tag, meta);
-    card.append(rankEl, emoji, body);
+    card.innerHTML = `
+      <div class="leader-card__rank font-orbitron" style="color:${rankNeon[i]}">${i + 1}</div>
+      <div class="leader-card__avatar">${p.avatar || "🎮"}</div>
+      <div class="leader-card__body">
+        <div class="leader-card__tag font-orbitron">${p.title || p.realName || p.username || "???"}</div>
+        <div class="leader-card__meta muted">LV ${p.level ?? 1} · ${p.xp ?? 0} XP</div>
+      </div>`;
     grid.appendChild(card);
   });
 
@@ -444,7 +585,7 @@ function initHomePage() {
     card.className = "leader-card leader-card--ghost card";
     card.innerHTML = `
       <div class="leader-card__rank font-orbitron">?</div>
-      <div class="leader-card__avatar leader-card__avatar--ghost">👤</div>
+      <div class="leader-card__avatar">👤</div>
       <div class="leader-card__body">
         <div class="leader-card__tag font-orbitron">???</div>
         <div class="leader-card__meta muted">LV ??? · ??? XP</div>
@@ -453,166 +594,37 @@ function initHomePage() {
   }
 }
 
-const KATAKANA_RAIN_CHARS =
-  "アイウエオカキクケコサシスセソタチツテトナニヌネノ".split("");
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DASHBOARD INIT (legacy stub)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-function initKatakanaRain() {
-  const canvas = document.getElementById("katakana-rain");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  let w = 0;
-  let h = 0;
-  let fontSize = 15;
-  let columnCount = 0;
-  let speeds = [];
-  let heads = [];
-  let colChars = [];
-
-  function pickChar() {
-    return KATAKANA_RAIN_CHARS[
-      Math.floor(Math.random() * KATAKANA_RAIN_CHARS.length)
-    ];
+function initDashboardPage() {
+  const levelEl = document.getElementById("dash-level");
+  if (!levelEl) return;
+  const p = getPlayer();
+  if (p) {
+    const xpEl = document.getElementById("dash-xp");
+    const streakEl = document.getElementById("dash-streak");
+    const emptyEl = document.getElementById("dash-empty");
+    if (emptyEl) emptyEl.style.display = "none";
+    levelEl.textContent = String(p.level ?? 1);
+    if (xpEl) xpEl.textContent = String(p.xp ?? 0);
+    if (streakEl) streakEl.textContent = String(p.streak ?? 0);
   }
-
-  function layout() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    fontSize = 15;
-    columnCount = Math.max(1, Math.ceil(w / fontSize));
-    speeds = Array.from({ length: columnCount }, () => 0.5 + Math.random() * 2.8);
-    heads = Array.from({ length: columnCount }, () => Math.random() * h);
-    colChars = Array.from({ length: columnCount }, () => pickChar());
-  }
-
-  layout();
-  window.addEventListener("resize", layout);
-
-  function frame() {
-    ctx.fillStyle = "rgba(7, 8, 15, 0.22)";
-    ctx.fillRect(0, 0, w, h);
-    ctx.font = `${fontSize}px "Noto Sans JP", sans-serif`;
-    ctx.textAlign = "center";
-
-    for (let i = 0; i < columnCount; i++) {
-      const x = i * fontSize + fontSize / 2;
-      ctx.fillStyle = "rgba(0, 255, 245, 0.15)";
-      ctx.fillText(colChars[i], x, heads[i]);
-      heads[i] += speeds[i];
-      if (heads[i] > h + fontSize) {
-        heads[i] = -fontSize * Math.random();
-        colChars[i] = pickChar();
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-
-  requestAnimationFrame(frame);
 }
 
-function runLogin() {
-  const userEl = document.getElementById("login-username");
-  const passEl = document.getElementById("login-password");
-  const errEl = document.getElementById("login-error");
-  const card = document.getElementById("login-card");
-  const btn = document.getElementById("login-submit");
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ARCHITECT PAGE INIT (legacy stub)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  if (!userEl || !passEl || !errEl) return;
-
-  const user = userEl.value.trim();
-  const pass = passEl.value;
-
-  function showError(detail) {
-    errEl.innerHTML = `<span class="login-error__line1">ACCESS DENIED // アクセス拒否</span><span class="login-error__line2">${detail}</span>`;
-    errEl.classList.remove("is-hidden");
-    card?.classList.remove("login-card--shake");
-    void card?.offsetWidth;
-    card?.classList.add("login-card--shake");
-  }
-
-  function clearError() {
-    errEl.classList.add("is-hidden");
-    errEl.innerHTML = "";
-    card?.classList.remove("login-card--shake");
-  }
-
-  clearError();
-
-  if (!user || !pass) {
-    showError("Fields cannot be empty, soldier.");
-    return;
-  }
-
-  const all = getAllPlayers();
-  let storageKey = null;
-  let player = null;
-  for (const [k, p] of Object.entries(all)) {
-    if (!p || typeof p !== "object") continue;
-    const tag = p.username != null ? String(p.username) : k;
-    if (tag.toLowerCase() === user.toLowerCase()) {
-      storageKey = k;
-      player = p;
-      break;
-    }
-  }
-
-  if (!player || storageKey == null) {
-    showError("No player found with that tag.");
-    return;
-  }
-
-  if (player.password !== pass) {
-    showError("Wrong password. Try again.");
-    return;
-  }
-
-  const loginUsername = player.username != null ? String(player.username) : storageKey;
-  player.username = loginUsername;
-  savePlayer(player);
-  setCurrentUser(loginUsername);
-
-  if (btn) {
-    btn.textContent = "AUTHENTICATED ✓";
-    btn.classList.add("btn-login-success");
-    btn.disabled = true;
-  }
-
-  const redirect = localStorage.getItem("redirectAfterLogin") || "dashboard.html";
-  localStorage.removeItem("redirectAfterLogin");
-  setTimeout(() => {
-    window.location.href = redirect;
-  }, 500);
+function initArchitectPage() {
+  // Full logic is handled inline in architect.html
+  // This stub exists so DOMContentLoaded doesn't throw
 }
 
-function initLoginPage() {
-  if (!document.getElementById("login-username")) return;
-
-  initKatakanaRain();
-
-  document.getElementById("login-toggle-pass")?.addEventListener("click", () => {
-    const inp = document.getElementById("login-password");
-    if (!inp) return;
-    inp.type = inp.type === "password" ? "text" : "password";
-  });
-
-  document.getElementById("login-submit")?.addEventListener("click", runLogin);
-
-  ["login-username", "login-password"].forEach((id) => {
-    document.getElementById(id)?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") runLogin();
-    });
-  });
-
-  document.getElementById("login-username")?.addEventListener("input", () => {
-    document.getElementById("login-error")?.classList.add("is-hidden");
-    document.getElementById("login-card")?.classList.remove("login-card--shake");
-  });
-  document.getElementById("login-password")?.addEventListener("input", () => {
-    document.getElementById("login-error")?.classList.add("is-hidden");
-    document.getElementById("login-card")?.classList.remove("login-card--shake");
-  });
-}
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DOM READY
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("loaded");

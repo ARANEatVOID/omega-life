@@ -119,8 +119,10 @@
     </div>
 
     <script src="app.js"></script>
-    <script defer>
-      (function () {
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+
+        // ── AUTH CHECK ──
         const _authUser = getCurrentUser();
         const _authPlayer = getPlayer();
         if (!_authUser || !_authPlayer) {
@@ -129,349 +131,330 @@
           return;
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-          const username = _authUser;
-          const p = _authPlayer;
-          const storageKey = "architectHistory_" + username;
-          let chatHistory = [];
+        const username = _authUser;
+        const p = _authPlayer;
+        let chatHistory = [];
 
-          const sendBtn = document.getElementById("chat-send");
-          const inputEl = document.getElementById("chat-input");
-          console.log("Send button:", sendBtn);
-          console.log("Input:", inputEl);
+        // ── ELEMENTS ──
+        const sendBtn = document.getElementById("chat-send");
+        const inputEl = document.getElementById("chat-input");
+        const messagesEl = document.getElementById("messages");
+        const scrollBottomBtn = document.getElementById("scroll-bottom-btn");
 
-          const messagesEl = document.getElementById("messages");
-          const scrollBottomBtn = document.getElementById("scroll-bottom-btn");
+        console.log("Send button:", sendBtn);
+        console.log("Input:", inputEl);
 
-          function escapeHtml(t) {
-            const d = document.createElement("div");
-            d.textContent = t;
-            return d.innerHTML;
-          }
+        // ── HELPERS ──
+        function escapeHtml(t) {
+          const d = document.createElement("div");
+          d.textContent = t;
+          return d.innerHTML;
+        }
 
-          function renderMarkdownLite(text) {
-            if (text == null) return "";
-            return String(text)
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-              .replace(/\*(.*?)\*/g, "<em>$1</em>")
-              .replace(/^- (.+)$/gm, '<span class="msg-list-item"><span class="msg-li-prefix">✦</span> $1</span>')
-              .replace(/\n/g, "<br>");
-          }
+        function renderMarkdownLite(text) {
+          if (text == null) return "";
+          return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.*?)\*/g, "<em>$1</em>")
+            .replace(/^- (.+)$/gm, '<span class="msg-list-item"><span class="msg-li-prefix">✦</span> $1</span>')
+            .replace(/\n/g, "<br>");
+        }
 
-          function appendMessage(role, text, isError) {
-            if (!messagesEl) return;
-            if (isError == null) isError = false;
-            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            let div;
-            if (role === "user") {
-              div = document.createElement("div");
-              div.className = "msg-user msg-enter";
-              div.innerHTML =
-                '<div class="msg-user-bubble">' +
-                escapeHtml(text) +
-                '</div><span class="msg-time font-orbitron">' +
-                time +
-                "</span>";
-              messagesEl.appendChild(div);
-            } else {
-              div = document.createElement("div");
-              div.className = "msg-architect msg-enter" + (isError ? " msg-architect--error" : "");
-              div.innerHTML =
-                '<div class="msg-architect-inner">' +
-                '<div class="msg-architect-hdr">' +
-                '<svg class="msg-architect-eye" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="#00fff5" stroke-width="1.2"/><circle cx="16" cy="16" r="2.5" fill="#00fff5"/></svg>' +
-                '<span class="font-orbitron">ARCHITECT</span></div>' +
-                '<div class="msg-architect-body">' +
-                renderMarkdownLite(text) +
-                "</div>" +
-                '<span class="msg-time font-orbitron">' +
-                time +
-                "</span></div>";
-              messagesEl.appendChild(div);
-            }
-            div.style.animation = "msgIn 0.2s ease forwards";
-          }
+        function appendMessage(role, text, isError) {
+          if (!messagesEl) return;
+          isError = isError || false;
+          const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          const div = document.createElement("div");
 
-          function showTyping() {
-            if (!messagesEl) return null;
-            const div = document.createElement("div");
-            div.className = "msg-architect msg-typing msg-enter";
+          if (role === "user") {
+            div.className = "msg-user msg-enter";
             div.innerHTML =
-              '<div class="msg-architect-inner msg-typing-inner">' +
+              '<div class="msg-user-bubble">' + escapeHtml(text) + "</div>" +
+              '<span class="msg-time font-orbitron">' + time + "</span>";
+          } else {
+            div.className = "msg-architect msg-enter" + (isError ? " msg-architect--error" : "");
+            div.innerHTML =
+              '<div class="msg-architect-inner">' +
+                '<div class="msg-architect-hdr">' +
+                  '<svg class="msg-architect-eye" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true">' +
+                  '<ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="#00fff5" stroke-width="1.2"/>' +
+                  '<circle cx="16" cy="16" r="2.5" fill="#00fff5"/></svg>' +
+                  '<span class="font-orbitron">ARCHITECT</span>' +
+                "</div>" +
+                '<div class="msg-architect-body">' + renderMarkdownLite(text) + "</div>" +
+                '<span class="msg-time font-orbitron">' + time + "</span>" +
+              "</div>";
+          }
+
+          messagesEl.appendChild(div);
+          div.style.animation = "msgIn 0.2s ease forwards";
+        }
+
+        function showTyping() {
+          if (!messagesEl) return null;
+          const div = document.createElement("div");
+          div.className = "msg-architect msg-typing msg-enter";
+          div.innerHTML =
+            '<div class="msg-architect-inner msg-typing-inner">' +
               '<span class="font-orbitron">ARCHITECT IS PROCESSING</span>' +
-              '<span class="typing-dots" aria-hidden="true"><span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span></span>' +
-              '<p class="jp typing-jp muted">処理中...</p></div>';
-            messagesEl.appendChild(div);
-            return div;
-          }
+              '<span class="typing-dots" aria-hidden="true">' +
+                '<span class="typing-dot">.</span>' +
+                '<span class="typing-dot">.</span>' +
+                '<span class="typing-dot">.</span>' +
+              "</span>" +
+              '<p class="jp typing-jp muted">処理中...</p>' +
+            "</div>";
+          messagesEl.appendChild(div);
+          return div;
+        }
 
-          function scrollToBottom() {
-            if (!messagesEl) return;
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          }
+        function scrollToBottom() {
+          if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
 
-          function updateMessageCount() {
-            const counter = document.getElementById("chat-session-count");
-            if (!counter || !window.matchMedia("(min-width: 768px)").matches) {
-              if (counter) counter.textContent = "";
-              return;
+        function isNearBottom() {
+          if (!messagesEl) return true;
+          return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 100;
+        }
+
+        function updateScrollBtn() {
+          if (scrollBottomBtn) scrollBottomBtn.classList.toggle("is-visible", !isNearBottom());
+        }
+
+        function updateMessageCount() {
+          const counter = document.getElementById("chat-session-count");
+          if (!counter) return;
+          if (!window.matchMedia("(min-width: 768px)").matches) {
+            counter.textContent = "";
+            return;
+          }
+          counter.textContent = Math.floor(chatHistory.length / 2) + " messages this session";
+        }
+
+        function autoResize() {
+          if (!inputEl) return;
+          inputEl.style.height = "auto";
+          inputEl.style.height = Math.min(120, Math.max(44, inputEl.scrollHeight)) + "px";
+        }
+
+        function saveHistory() {
+          try {
+            localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
+          } catch (e) {}
+        }
+
+        // ── SEND MESSAGE ──
+        async function handleSend() {
+          if (!inputEl) return;
+          const text = inputEl.value.trim();
+          console.log("handleSend called, text:", text);
+          if (!text) return;
+
+          inputEl.value = "";
+          inputEl.style.height = "44px";
+
+          appendMessage("user", text);
+          scrollToBottom();
+          updateScrollBtn();
+
+          chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+          const typingEl = showTyping();
+          scrollToBottom();
+          updateScrollBtn();
+
+          try {
+            const sysPrompt = buildArchitectPrompt();
+            console.log("Calling ARCHITECT API...");
+            const historyToSend = chatHistory.slice(0, -1);
+            const response = await callArchitect(sysPrompt, historyToSend, text);
+            console.log("ARCHITECT response:", response);
+
+            if (typingEl) typingEl.remove();
+
+            if (!response) throw new Error("Empty response");
+
+            appendMessage("architect", response);
+            chatHistory.push({ role: "model", parts: [{ text: response }] });
+
+            if (chatHistory.length > 20) {
+              chatHistory = chatHistory.slice(chatHistory.length - 20);
             }
-            const count = chatHistory.length;
-            counter.textContent = Math.floor(count / 2) + " messages this session";
-          }
 
-          function isNearBottom() {
-            if (!messagesEl) return true;
-            const th = 100;
-            return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < th;
-          }
-
-          function updateScrollBtn() {
-            if (!scrollBottomBtn) return;
-            scrollBottomBtn.classList.toggle("is-visible", !isNearBottom());
-          }
-
-          if (messagesEl) {
-            messagesEl.addEventListener("scroll", updateScrollBtn);
-          }
-          if (scrollBottomBtn) {
-            scrollBottomBtn.addEventListener("click", function () {
-              scrollToBottom();
-              updateScrollBtn();
-            });
-          }
-
-          function autoResize() {
-            if (!inputEl) return;
-            inputEl.style.height = "auto";
-            inputEl.style.height = Math.min(120, Math.max(44, inputEl.scrollHeight)) + "px";
-          }
-
-          async function handleSend() {
-            if (!inputEl) return;
-            const text = inputEl.value.trim();
-            console.log("handleSend called, text:", text);
-            if (!text) return;
-
-            inputEl.value = "";
-            inputEl.style.height = "44px";
-
-            appendMessage("user", text);
+            saveHistory();
+            updateMessageCount();
             scrollToBottom();
             updateScrollBtn();
 
-            chatHistory.push({ role: "user", parts: [{ text: text }] });
-
-            const typingEl = showTyping();
+          } catch (err) {
+            console.error("ARCHITECT error:", err);
+            if (typingEl) typingEl.remove();
+            appendMessage("architect",
+              "Connection disrupted. Check your API key or network. — 接続エラー\n\nError: " + err.message,
+              true
+            );
             scrollToBottom();
             updateScrollBtn();
-
-            if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
-              if (typingEl) typingEl.remove();
-              appendMessage(
-                "architect",
-                "No API key configured. Open app.js and set GEMINI_API_KEY. — 未設定",
-                true
-              );
-              scrollToBottom();
-              updateScrollBtn();
-              return;
-            }
-
-            try {
-              const sysPrompt = typeof buildArchitectPrompt === "function" ? buildArchitectPrompt() : "";
-              console.log("Calling ARCHITECT API...");
-
-              const historyToSend = chatHistory.slice(0, -1);
-              const response = await callArchitect(sysPrompt, historyToSend, text);
-
-              console.log("ARCHITECT response:", response);
-
-              if (typingEl) typingEl.remove();
-
-              if (response == null || response === "") throw new Error("Empty response");
-
-              appendMessage("architect", response);
-              chatHistory.push({ role: "model", parts: [{ text: response }] });
-
-              if (chatHistory.length > 20) {
-                chatHistory = chatHistory.slice(chatHistory.length - 20);
-              }
-
-              try {
-                localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
-              } catch (e) {}
-
-              updateMessageCount();
-              scrollToBottom();
-              updateScrollBtn();
-            } catch (err) {
-              console.error("ARCHITECT error:", err);
-              if (typingEl) typingEl.remove();
-              appendMessage(
-                "architect",
-                "Connection disrupted. Check your API key or network. — 接続エラー",
-                true
-              );
-              scrollToBottom();
-              updateScrollBtn();
-            }
           }
+        }
 
-          async function generateOpeningMessage() {
-            const pl = getPlayer();
-            if (!pl) return;
+        // ── OPENING MESSAGE ──
+        async function generateOpeningMessage() {
+          const pl = getPlayer();
+          if (!pl) return;
 
-            const typingEl = showTyping();
+          const typingEl = showTyping();
+          scrollToBottom();
+
+          let fieldContext = "";
+          if (pl.lifeField === "school") fieldContext = "Grade " + (pl.grade || "?") + " student";
+          else if (pl.lifeField === "university") fieldContext = (pl.major || "Studies") + " student at " + (pl.universityName || "university");
+          else if (pl.lifeField === "job") fieldContext = (pl.jobTitle || "Professional") + " at " + (pl.company || "a company");
+          else if (pl.lifeField === "retired") fieldContext = "retired " + (pl.previousProfession || "professional");
+
+          const prompt =
+            "You are ARCHITECT. Generate your opening message to " + (pl.realName || "the player") +
+            ' who calls themselves "' + (pl.title || "operator") + '".' +
+            " They are " + (pl.age || "?") + " years old, a " + fieldContext + "." +
+            ' Their stated struggle: "' + (pl.architectBriefing || "none given") + '".' +
+            " Their current level: " + (pl.level || 1) + ", streak: " + (pl.streak || 0) + " days." +
+            " Write 3-4 sentences. Be direct. Reference their title and struggle." +
+            " Make them feel seen and slightly challenged. No fluff." +
+            " Do not start with Hello or Hi. Start with their name or title.";
+
+          try {
+            const response = await callArchitectOnce(prompt);
+            if (typingEl) typingEl.remove();
+            const trimmed = (response || "").trim();
+            appendMessage("architect", trimmed);
+            chatHistory.push({ role: "model", parts: [{ text: trimmed }] });
+            saveHistory();
+            updateMessageCount();
             scrollToBottom();
             updateScrollBtn();
-
-            let fieldContext = "";
-            if (pl.lifeField === "school") fieldContext = "Grade " + (pl.grade || "?") + " student";
-            else if (pl.lifeField === "university")
-              fieldContext = (pl.major || "Studies") + " student at " + (pl.universityName || "university");
-            else if (pl.lifeField === "job")
-              fieldContext = (pl.jobTitle || "Professional") + " at " + (pl.company || "");
-            else if (pl.lifeField === "retired") fieldContext = "retired " + (pl.previousProfession || "");
-
-            const prompt =
-              "You are ARCHITECT. Generate your opening message to " +
-              (pl.realName || "the player") +
-              ' who calls themselves "' +
-              (pl.title || "operator") +
-              '". They are ' +
-              (pl.age || "?") +
-              " years old, a " +
-              fieldContext +
-              '. Their stated struggle: "' +
-              (pl.architectBriefing || "") +
-              '". Their current level: ' +
-              (pl.level || 1) +
-              ", streak: " +
-              (pl.streak || 0) +
-              " days. Write 3-4 sentences. Be direct. Reference their title and struggle. Make them feel seen and slightly challenged. No fluff. Do not start with Hello or Hi. Start with their name or title.";
-
-            try {
-              if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
-                if (typingEl) typingEl.remove();
-                const fallback =
-                  (pl.realName || pl.title || "Operator") +
-                  ". I'm loaded. Your briefing is on file. Speak when you're ready to work — not when you want comfort.";
-                appendMessage("architect", fallback);
-                chatHistory.push({ role: "model", parts: [{ text: fallback }] });
-                localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
-                updateMessageCount();
-                scrollToBottom();
-                updateScrollBtn();
-                return;
-              }
-
-              const response = await callArchitectOnce(prompt, 512);
-              if (typingEl) typingEl.remove();
-              const trimmed = (response || "").trim();
-              appendMessage("architect", trimmed);
-              chatHistory.push({ role: "model", parts: [{ text: trimmed }] });
-              localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
-              updateMessageCount();
-              scrollToBottom();
-              updateScrollBtn();
-            } catch (err) {
-              console.error("Opening message error:", err);
-              if (typingEl) typingEl.remove();
-              appendMessage("architect", "ARCHITECT is offline. Check your API key in app.js.", true);
-              scrollToBottom();
-              updateScrollBtn();
-            }
+          } catch (err) {
+            console.error("Opening message error:", err);
+            if (typingEl) typingEl.remove();
+            const fallback = (pl.realName || pl.title || "Operator") +
+              ". I'm online. Your briefing is loaded. Speak when ready.";
+            appendMessage("architect", fallback);
+            chatHistory.push({ role: "model", parts: [{ text: fallback }] });
+            saveHistory();
+            scrollToBottom();
+            updateScrollBtn();
           }
+        }
 
-          if (sendBtn) {
-            sendBtn.addEventListener("click", function () {
-              console.log("Send clicked");
+        // ── EVENT LISTENERS ──
+        if (sendBtn) {
+          sendBtn.addEventListener("click", function () {
+            console.log("Send clicked");
+            handleSend();
+          });
+        }
+
+        if (inputEl) {
+          inputEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              console.log("Enter pressed");
               handleSend();
+            }
+          });
+          inputEl.addEventListener("input", autoResize);
+        }
+
+        if (messagesEl) messagesEl.addEventListener("scroll", updateScrollBtn);
+        if (scrollBottomBtn) {
+          scrollBottomBtn.addEventListener("click", function () {
+            scrollToBottom();
+            updateScrollBtn();
+          });
+        }
+
+        // ── QUICK PROMPTS ──
+        const prompts = [
+          "💡 Build my routine",
+          "📐 Solve this for me",
+          "🎯 Review my goals",
+          "🔥 Motivate me. Brutally.",
+          "🧠 What should I focus on?",
+          "📊 Analyze my progress",
+          "❓ Ask me something hard",
+          "🌐 Find a fact for me",
+        ];
+        const qp = document.getElementById("quick-prompts");
+        if (qp && inputEl) {
+          prompts.forEach(function (label) {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "quick-prompt-chip";
+            b.textContent = label;
+            b.addEventListener("click", function () {
+              inputEl.value = label;
+              inputEl.focus();
+              autoResize();
             });
-          }
+            qp.appendChild(b);
+          });
+        }
 
-          if (inputEl) {
-            inputEl.addEventListener("keydown", function (e) {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                console.log("Enter pressed");
-                handleSend();
-              }
-            });
-            inputEl.addEventListener("input", autoResize);
-          }
+        // ── PLAYER CARD ──
+        function populatePlayerCard() {
+          const emojiEl = document.getElementById("arch-player-emoji");
+          const tagEl = document.getElementById("arch-player-tag");
+          const lvlEl = document.getElementById("arch-player-level");
+          if (emojiEl) emojiEl.textContent = p.avatar || "🎮";
+          if (tagEl) tagEl.textContent = "@" + (p.username || username);
+          if (lvlEl) lvlEl.textContent = "LV " + (p.level || 1);
+        }
 
-          function populatePlayerCard() {
-            document.getElementById("arch-player-emoji").textContent = p.avatar || "🎮";
-            document.getElementById("arch-player-tag").textContent = "@" + (p.username || username);
-            document.getElementById("arch-player-level").textContent = "LV " + (p.level || 1);
-          }
-
-          const prompts = [
-            "💡 Build my routine",
-            "📐 Solve this for me",
-            "🎯 Review my goals",
-            "🔥 Motivate me. Brutally.",
-            "🧠 What should I focus on?",
-            "📊 Analyze my progress",
-            "❓ Ask me something hard",
-            "🌐 Find a fact for me",
-          ];
-          const qp = document.getElementById("quick-prompts");
-          if (qp && inputEl) {
-            prompts.forEach(function (label) {
-              const b = document.createElement("button");
-              b.type = "button";
-              b.className = "quick-prompt-chip";
-              b.textContent = label;
-              b.addEventListener("click", function () {
-                inputEl.value = label;
-                inputEl.focus();
-                autoResize();
-              });
-              qp.appendChild(b);
-            });
-          }
-
-          document.getElementById("arch-clear-session").addEventListener("click", function () {
+        // ── CLEAR SESSION ──
+        const clearBtn = document.getElementById("arch-clear-session");
+        if (clearBtn) {
+          clearBtn.addEventListener("click", function () {
             if (!confirm("This will erase ARCHITECT's memory of this session.")) return;
             chatHistory = [];
-            localStorage.removeItem(storageKey);
+            localStorage.removeItem("architectHistory_" + username);
             if (messagesEl) messagesEl.innerHTML = "";
             updateMessageCount();
             generateOpeningMessage();
           });
+        }
 
-          const _savedHistory = localStorage.getItem("architectHistory_" + username);
-          if (_savedHistory) {
-            try {
-              chatHistory = JSON.parse(_savedHistory);
-              if (!Array.isArray(chatHistory)) chatHistory = [];
+        // ── LOAD HISTORY OR OPENING MESSAGE ──
+        const saved = localStorage.getItem("architectHistory_" + username);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              chatHistory = parsed;
               chatHistory.forEach(function (msg) {
                 const t = msg.parts && msg.parts[0] ? msg.parts[0].text : "";
                 if (msg.role === "user") appendMessage("user", t);
                 else if (msg.role === "model") appendMessage("architect", t);
               });
-            } catch (e) {
-              chatHistory = [];
+            } else {
+              generateOpeningMessage();
             }
-          }
-
-          if (chatHistory.length === 0) {
+          } catch (e) {
+            chatHistory = [];
             generateOpeningMessage();
           }
+        } else {
+          generateOpeningMessage();
+        }
 
-          populatePlayerCard();
-          updateMessageCount();
-          scrollToBottom();
-          updateScrollBtn();
-          window.addEventListener("resize", updateMessageCount);
-        });
-      })();
+        // ── INIT ──
+        populatePlayerCard();
+        updateMessageCount();
+        scrollToBottom();
+        updateScrollBtn();
+        window.addEventListener("resize", updateMessageCount);
+      });
     </script>
   </body>
 </html>

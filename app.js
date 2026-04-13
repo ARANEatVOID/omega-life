@@ -1,4 +1,4 @@
-const OPENROUTER_API_KEY = "YOUR_OPENROUTER_KEY_HERE";
+const OPENROUTER_API_KEY = "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";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct";
 

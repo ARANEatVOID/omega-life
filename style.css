@@ -3878,3 +3878,6 @@ body.architect-page #toast-container > * {
     max-width: 90%;
   }
 }
+.planner-mini-form { padding: 8px; background: var(--bg-card, #0d0e1a); border: 1px solid var(--cyan); border-radius: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+.planner-mini-form .form-input { font-size: 0.8rem; padding: 4px 8px; height: auto; }
+.planner-mini-form .btn-muted { background: transparent; border: 1px solid #555; color: #aaa; }

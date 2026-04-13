@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = "AIzaSyCM1WvOLmXIFugYTzaRI2ELrzL04OpVzt8";
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
 // Storage helpers
 function getPlayer() {
   const current = getCurrentUser();
@@ -138,6 +138,10 @@ async function callArchitect(systemPrompt, history = [], userMessage) {
     }),
   });
   const data = await response.json();
+  if (!data.candidates || !data.candidates[0]) {
+    const reason = data.error?.message || data.promptFeedback?.blockReason || JSON.stringify(data);
+    throw new Error("Gemini API: " + reason);
+  }
   return data.candidates[0].content.parts[0].text;
 }
 
@@ -152,7 +156,10 @@ async function callArchitectOnce(prompt, maxOutputTokens = 128) {
   });
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error(data?.error?.message || "Empty response");
+  if (!text) {
+    const reason = data?.error?.message || data?.promptFeedback?.blockReason || JSON.stringify(data);
+    throw new Error(reason || "Empty response");
+  }
   return text;
 }
 

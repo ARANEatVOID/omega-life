@@ -35,12 +35,31 @@ function saveAllPlayers(data) {
 }
 
 // XP system
+function xpNeededForNextLevel(level) {
+  const base = 150;
+  const growthPerLevel = 35;
+  const lv = Math.max(1, Number(level) || 1);
+  return base + (lv - 1) * growthPerLevel;
+}
+
+function levelFromXP(totalXP) {
+  let xp = Math.max(0, Number(totalXP) || 0);
+  let level = 1;
+  let needed = xpNeededForNextLevel(level);
+  while (xp >= needed) {
+    xp -= needed;
+    level += 1;
+    needed = xpNeededForNextLevel(level);
+  }
+  return { level, currentLevelXP: xp, nextLevelXP: needed };
+}
+
 function awardXP(amount, domains = [], subject = null) {
   const player = getPlayer();
   if (!player) return;
-  const oldLevel = player.level;
+  const oldLevel = player.level || 1;
   player.xp += amount;
-  player.level = Math.floor(player.xp / 150) + 1;
+  player.level = levelFromXP(player.xp).level;
   if (domains.length > 0) {
     const per = Math.floor(amount / domains.length);
     domains.forEach((d) => {

@@ -95,6 +95,16 @@
   let plannerBlocks = [];
   let taskForm = { xp: 25, time: "15min", priority: "MEDIUM", secondaries: new Set() };
 
+  function calcLevelProgress(totalXP) {
+    if (typeof levelFromXP === "function") return levelFromXP(totalXP);
+    const fallbackXP = Math.max(0, Number(totalXP) || 0);
+    return {
+      level: Math.floor(fallbackXP / 150) + 1,
+      currentLevelXP: fallbackXP % 150,
+      nextLevelXP: 150,
+    };
+  }
+
   function domainById(id) {
     return DOMAINS.find((d) => d.id === id) || DOMAINS[0];
   }
@@ -107,6 +117,8 @@
     p.tasks = Array.isArray(p.tasks) ? p.tasks : [];
     p.bosses = Array.isArray(p.bosses) ? p.bosses : [];
     p.taskHistory = Array.isArray(p.taskHistory) ? p.taskHistory : [];
+    p.taskTemplates = Array.isArray(p.taskTemplates) ? p.taskTemplates : [];
+    p.bossTemplates = Array.isArray(p.bossTemplates) ? p.bossTemplates : [];
     p.planHistory = p.planHistory && typeof p.planHistory === "object" ? p.planHistory : {};
     p.subjectXP = p.subjectXP && typeof p.subjectXP === "object" ? p.subjectXP : {};
     p.achievements = Array.isArray(p.achievements) ? p.achievements : [];
@@ -256,11 +268,15 @@
     if (ln) ln.textContent = String(p.level ?? 1);
     const rt = document.getElementById("dash-rank-title");
     if (rt) rt.textContent = rankTitleForLevel(p.level ?? 1);
-    const mod = (p.xp || 0) % 150;
+    const progress = calcLevelProgress(p.xp || 0);
     const xf = document.getElementById("dash-xp-frac");
-    if (xf) xf.textContent = `${mod} / 150`;
+    if (xf) xf.textContent = `${progress.currentLevelXP} / ${progress.nextLevelXP}`;
     const fill = document.getElementById("dash-xp-fill");
-    if (fill) fill.style.width = `${(mod / 150) * 100}%`;
+    if (fill)
+      fill.style.width = `${Math.min(
+        100,
+        (progress.currentLevelXP / Math.max(1, progress.nextLevelXP)) * 100
+      )}%`;
     document.getElementById("dash-streak-val").textContent = String(p.streak ?? 0);
     document.getElementById("dash-boss-val").textContent = String(p.bossesDefeated ?? 0);
     document.getElementById("dash-task-val").textContent = String(p.tasksCompleted ?? 0);
@@ -438,6 +454,119 @@
     subj.innerHTML = (p.subjects || [])
       .map((s) => `<option value="${s.name}">${s.emoji || "📚"} ${s.name}</option>`)
       .join("");
+
+    const panel = document.getElementById("add-task-panel");
+    if (panel && !document.getElementById("task-template-wrap")) {
+      const row = document.createElement("div");
+      row.id = "task-template-wrap";
+      row.className = "form-group";
+      row.innerHTML = `
+        <label class="form-label">TASK TEMPLATE</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select class="form-input" id="task-template-select" style="flex:1;min-width:180px;"></select>
+          <button type="button" class="btn btn-cyan btn-sm" id="task-template-apply">APPLY</button>
+          <button type="button" class="btn btn-yellow btn-sm" id="task-template-save">SAVE AS TEMPLATE</button>
+        </div>`;
+      const createBtn = document.getElementById("btn-create-task");
+      panel.insertBefore(row, createBtn);
+    }
+    refreshTaskTemplates();
+    document.getElementById("task-template-save")?.addEventListener("click", saveTaskTemplate);
+    document.getElementById("task-template-apply")?.addEventListener("click", applyTaskTemplate);
+  }
+
+  function refreshTaskTemplates() {
+    const sel = document.getElementById("task-template-select");
+    if (!sel) return;
+    const p = ensurePlayer(getPlayer());
+    const options = [`<option value="">Select template...</option>`]
+      .concat(
+        (p.taskTemplates || []).map(
+          (t) => `<option value="${t.id}">${escapeHtml(t.templateName || "Template")}</option>`
+        )
+      )
+      .join("");
+    sel.innerHTML = options;
+  }
+
+  function saveTaskTemplate() {
+    const p = ensurePlayer(getPlayer());
+    const name = prompt("Template name?");
+    if (!name) return;
+    const dom = document.getElementById("task-domain").value;
+    const tpl = {
+      id: crypto.randomUUID(),
+      templateName: name.trim(),
+      name: document.getElementById("task-name").value.trim(),
+      description: document.getElementById("task-desc").value.trim(),
+      primaryDomain: dom,
+      subField: document.getElementById("task-subfield").value,
+      secondaryDomains: [...taskForm.secondaries],
+      subject: dom === "academic" ? document.getElementById("task-subject").value : null,
+      xpReward:
+        taskForm.xp === "CUSTOM"
+          ? Number(document.getElementById("task-xp-custom").value) || 25
+          : taskForm.xp,
+      estimatedTime: taskForm.time,
+      priority: taskForm.priority,
+    };
+    p.taskTemplates.push(tpl);
+    syncPlayerToStore(p);
+    refreshTaskTemplates();
+    showToast("Task template saved.", "success");
+  }
+
+  function applyTaskTemplate() {
+    const sel = document.getElementById("task-template-select");
+    const p = ensurePlayer(getPlayer());
+    const tpl = (p.taskTemplates || []).find((t) => t.id === sel?.value);
+    if (!tpl) return;
+    document.getElementById("task-name").value = tpl.name || "";
+    document.getElementById("task-desc").value = tpl.description || "";
+    document.getElementById("task-domain").value = tpl.primaryDomain || "academic";
+    document.getElementById("task-domain").dispatchEvent(new Event("change"));
+    document.getElementById("task-subfield").value = tpl.subField || "";
+    document.getElementById("task-subject").value = tpl.subject || "";
+    document.getElementById("task-priority-chips")
+      ?.querySelectorAll(".chip")
+      .forEach((c) => {
+        const on = c.textContent === (tpl.priority || "MEDIUM");
+        c.classList.toggle("is-selected", on);
+      });
+    taskForm.priority = tpl.priority || "MEDIUM";
+    document.getElementById("task-time-chips")
+      ?.querySelectorAll(".chip")
+      .forEach((c) => {
+        const on = c.textContent === (tpl.estimatedTime || "15min");
+        c.classList.toggle("is-selected", on);
+      });
+    taskForm.time = tpl.estimatedTime || "15min";
+    document.getElementById("task-xp-chips")
+      ?.querySelectorAll(".chip")
+      .forEach((c) => c.classList.remove("is-selected"));
+    const xpChip = Array.from(
+      document.getElementById("task-xp-chips")?.querySelectorAll(".chip") || []
+    ).find((c) => c.textContent === String(tpl.xpReward));
+    if (xpChip) {
+      xpChip.classList.add("is-selected");
+      taskForm.xp = Number(tpl.xpReward) || 25;
+      document.getElementById("task-xp-custom-wrap")?.classList.add("is-hidden");
+    } else {
+      const custom = Array.from(
+        document.getElementById("task-xp-chips")?.querySelectorAll(".chip") || []
+      ).find((c) => c.textContent === "CUSTOM");
+      custom?.classList.add("is-selected");
+      taskForm.xp = "CUSTOM";
+      document.getElementById("task-xp-custom-wrap")?.classList.remove("is-hidden");
+      document.getElementById("task-xp-custom").value = String(tpl.xpReward || 25);
+    }
+    taskForm.secondaries = new Set(tpl.secondaryDomains || []);
+    document.getElementById("task-secondary-chips")
+      ?.querySelectorAll(".chip")
+      .forEach((c) => {
+        c.classList.toggle("is-selected", taskForm.secondaries.has(c.dataset.domain));
+      });
+    showToast("Task template applied.", "success");
   }
 
   function renderTasks() {
@@ -448,10 +577,9 @@
     if (!wrap) return;
     const active = [];
     const overdue = [];
-    const doneToday = [];
+    const completed = [];
     p.tasks.forEach((t) => {
-      if (t.completed && t.completedAt >= sod) doneToday.push(t);
-      else if (t.completed) return;
+      if (t.completed) completed.push(t);
       else if (t.due && new Date(t.due).getTime() < now) overdue.push(t);
       else active.push(t);
     });
@@ -463,7 +591,8 @@
         <div class="task-card__row1"><span class="task-card__name font-orbitron">${escapeHtml(t.name)}</span><span class="task-priority ${prClass}">${pr}</span></div>
         <div class="task-card__row2 muted">${d.icon} ${d.label}${t.subject ? ` · ${escapeHtml(t.subject)}` : ""}${t.due ? ` · Due ${new Date(t.due).toLocaleString()}` : ""}</div>
         <div class="task-card__row3"><span class="task-xp-badge">+${t.xpReward} XP</span><span>${t.estimatedTime || ""}</span></div>
-        <div class="task-card__actions">
+        ${t.completed ? '<div class="task-card__row2"><span class="task-xp-badge">CONQUERED ✓</span></div>' : ""}
+        <div class="task-card__actions" ${t.completed ? 'style="display:none;"' : ""}>
           <button type="button" class="btn btn-cyan btn-sm task-start" data-id="${t.id}" ${t.startTime ? "disabled" : ""}>${t.startTime ? "IN PROGRESS…" : "▶ START"}</button>
           <button type="button" class="btn btn-pink btn-sm task-done" data-id="${t.id}">✓ COMPLETE</button>
         </div>
@@ -477,7 +606,7 @@
     wrap.innerHTML =
       section("ACTIVE MISSIONS", active, "sec-active", "", true) +
       section("OVERDUE", overdue, "sec-overdue", overdue.length ? "task-section--overdue" : "", true) +
-      section("COMPLETED TODAY", doneToday, "sec-done", "", false);
+      section("COMPLETION TAB // CONQUERED", completed.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)), "sec-done", "", false);
     wrap.querySelectorAll(".task-section__head").forEach((h) => {
       h.addEventListener("click", () => {
         const b = document.getElementById(h.dataset.collapse);
@@ -632,6 +761,7 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       const b = document.createElement("button");
       b.type = "button";
       b.className = `chip chip-toggle ${cls}` + (id === "normal" ? " is-selected" : "");
+      b.dataset.diff = id;
       b.textContent = label;
       b.addEventListener("click", () => {
         wrap.querySelectorAll(".chip").forEach((c) => c.classList.remove("is-selected"));
@@ -639,6 +769,64 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
         bossDiff = id;
       });
       wrap.appendChild(b);
+    });
+    const templateRow = document.createElement("div");
+    templateRow.className = "form-group";
+    templateRow.innerHTML = `
+      <label class="form-label">BOSS TEMPLATE</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="form-input" id="boss-template-select" style="flex:1;min-width:180px;"></select>
+        <button type="button" class="btn btn-cyan btn-sm" id="boss-template-apply">APPLY</button>
+        <button type="button" class="btn btn-yellow btn-sm" id="boss-template-save">SAVE AS TEMPLATE</button>
+      </div>`;
+    el.insertBefore(templateRow, document.getElementById("btn-summon-boss"));
+    const refreshBossTemplates = () => {
+      const p = ensurePlayer(getPlayer());
+      const sel = document.getElementById("boss-template-select");
+      if (!sel) return;
+      sel.innerHTML = [`<option value="">Select template...</option>`]
+        .concat(
+          (p.bossTemplates || []).map(
+            (t) => `<option value="${t.id}">${escapeHtml(t.templateName || "Template")}</option>`
+          )
+        )
+        .join("");
+    };
+    refreshBossTemplates();
+    document.getElementById("boss-template-save").addEventListener("click", () => {
+      const p = ensurePlayer(getPlayer());
+      const templateName = prompt("Boss template name?");
+      if (!templateName) return;
+      p.bossTemplates.push({
+        id: crypto.randomUUID(),
+        templateName: templateName.trim(),
+        name: document.getElementById("boss-name").value.trim(),
+        domain: document.getElementById("boss-domain").value,
+        subject:
+          document.getElementById("boss-domain").value === "academic"
+            ? document.getElementById("boss-subject").value
+            : null,
+        difficulty: bossDiff,
+      });
+      syncPlayerToStore(p);
+      refreshBossTemplates();
+      showToast("Boss template saved.", "success");
+    });
+    document.getElementById("boss-template-apply").addEventListener("click", () => {
+      const p = ensurePlayer(getPlayer());
+      const tpl = (p.bossTemplates || []).find(
+        (t) => t.id === document.getElementById("boss-template-select").value
+      );
+      if (!tpl) return;
+      document.getElementById("boss-name").value = tpl.name || "";
+      document.getElementById("boss-domain").value = tpl.domain || "academic";
+      document.getElementById("boss-domain").dispatchEvent(new Event("change"));
+      document.getElementById("boss-subject").value = tpl.subject || "";
+      bossDiff = tpl.difficulty || "normal";
+      wrap.querySelectorAll(".chip").forEach((chip) => {
+        chip.classList.toggle("is-selected", chip.dataset.diff === bossDiff);
+      });
+      showToast("Boss template applied.", "success");
     });
     document.getElementById("btn-summon-boss").addEventListener("click", () => {
       const name = document.getElementById("boss-name").value.trim();
@@ -864,19 +1052,27 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
           const d = new Date(mon);
           d.setDate(mon.getDate() + i);
           const ds = d.toDateString();
-          const tasks = (p.taskHistory || []).filter(
+          const completedTasks = (p.taskHistory || []).filter(
             (t) => new Date(t.completedAt).toDateString() === ds
           );
-          const dots = tasks
+          const planBlocks = p.planHistory?.[ds]?.blocks || [];
+          const dots = completedTasks
             .slice(0, 5)
             .map((t) => {
               const col = domainById(t.primaryDomain || "academic").color;
               return `<span class="cal-dot" style="background:${col}"></span>`;
             })
             .join("");
+          const routine = planBlocks
+            .slice(0, 3)
+            .map(
+              () =>
+                '<span class="cal-dot" style="background:transparent;border:1px solid var(--yellow);"></span>'
+            )
+            .join("");
           const today = d.toDateString() === new Date().toDateString();
           return `<div class="cal-day ${today ? "is-today" : ""}"><span class="font-orbitron">${name}</span><span>${d.getDate()}</span>
-          <div class="cal-dots">${tasks.length ? dots : '<span class="muted small">休息</span>'}</div></div>`;
+          <div class="cal-dots">${completedTasks.length || planBlocks.length ? `${dots}${routine}` : '<span class="muted small">休息</span>'}</div></div>`;
         })
         .join("");
     }

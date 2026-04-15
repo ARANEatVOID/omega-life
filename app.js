@@ -1,4 +1,4 @@
-const ARCHITECT_API_URL = "https://YOUR_RENDER_BACKEND_URL/api/architect";
+const ARCHITECT_API_URL = "https://re-life-backend.onrender.com/api/architect";
 // Storage helpers
 function getPlayer() {
   const current = getCurrentUser();

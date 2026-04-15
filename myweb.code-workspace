@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../myweb"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "omega-life"
+	}
+}

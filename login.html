@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re:LiFE — Player Login</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="login-page">
+    <div id="toast-container"></div>
+
+    <canvas id="katakana-rain" aria-hidden="true"></canvas>
+
+    <header id="site-nav" class="site-nav">
+      <a href="index.html" class="site-nav__logo">ΩMEGA</a>
+      <button
+        type="button"
+        class="site-nav__toggle"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="site-nav-links"
+      >
+        ☰
+      </button>
+      <nav class="site-nav__links" id="site-nav-links" aria-label="Main navigation">
+        <a href="index.html">HOME</a>
+        <a href="login.html">LOGIN</a>
+        <a href="signup.html">SIGN UP</a>
+      </nav>
+    </header>
+
+    <main class="login-shell">
+      <div class="login-card-wrap">
+        <article class="card login-card" id="login-card">
+          <div class="login-card__icon" aria-hidden="true">
+            <svg class="login-eye-svg" viewBox="0 0 48 48" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="24" cy="24" rx="18" ry="11" fill="none" stroke="#1a6b8a" stroke-width="1.5" opacity="0.75" />
+              <circle cx="24" cy="24" r="5" fill="none" stroke="#1a6b8a" stroke-width="1.2" />
+              <circle cx="24" cy="24" r="2" fill="#1a6b8a" opacity="0.8" />
+              <path d="M6 24 Q24 8 42 24" fill="none" stroke="#1a6b8a" stroke-width="1" opacity="0.4" />
+              <path d="M6 24 Q24 40 42 24" fill="none" stroke="#1a6b8a" stroke-width="1" opacity="0.4" />
+            </svg>
+          </div>
+          <h1 class="login-card__title font-orbitron">PLAYER LOGIN</h1>
+          <p class="login-card__subtitle jp">ログイン — Authenticate, soldier.</p>
+
+          <div class="login-card__form">
+            <div class="form-group">
+              <label class="form-label" for="login-username">PLAYER TAG</label>
+              <input
+                class="form-input"
+                id="login-username"
+                type="text"
+                name="login-username"
+                placeholder="your player tag"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">PASSWORD</label>
+              <div class="password-row">
+                <input
+                  class="form-input"
+                  id="login-password"
+                  type="password"
+                  name="login-password"
+                  placeholder="••••••••"
+                  autocomplete="off"
+                />
+                <button type="button" class="btn-eye" id="login-toggle-pass" aria-label="Show password">
+                  👁
+                </button>
+              </div>
+            </div>
+
+            <div id="login-error" class="login-error is-hidden" role="alert"></div>
+
+            <button type="button" class="btn btn-pink login-btn-arena" id="login-submit">
+              ENTER THE ARENA ▶
+            </button>
+          </div>
+        </article>
+
+        <div class="login-footer-links">
+          <p class="login-no-account muted">NO ACCOUNT?</p>
+          <a class="btn btn-cyan btn-sm" href="signup.html">ENLIST NOW →</a>
+        </div>
+        <p class="login-forgot-note">Lost your credentials? That's a you problem, soldier.</p>
+      </div>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

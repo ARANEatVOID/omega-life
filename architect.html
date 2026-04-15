@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re:LiFE — ARCHITECT</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="architect-page">
+    <div id="toast-container"></div>
+
+    <div class="architect-shell">
+      <aside id="architect-identity" class="architect-identity">
+        <div class="architect-identity__scroll">
+          <div class="architect-eye-wrap">
+            <svg
+              id="architect-eye"
+              class="architect-eye-svg"
+              viewBox="0 0 140 140"
+              width="120"
+              height="120"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <filter id="archEyeGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="2.5" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g filter="url(#archEyeGlow)" stroke="#1a6b8a" fill="none" stroke-width="1.5">
+                <circle cx="70" cy="70" r="38" />
+                <circle cx="70" cy="70" r="18" fill="rgba(26,107,138,0.08)" />
+                <circle cx="70" cy="70" r="6" fill="#1a6b8a" stroke="none" />
+                <line x1="70" y1="8" x2="70" y2="18" />
+                <line x1="70" y1="122" x2="70" y2="132" />
+                <line x1="8" y1="70" x2="18" y2="70" />
+                <line x1="122" y1="70" x2="132" y2="70" />
+                <line x1="28" y1="28" x2="36" y2="36" />
+                <line x1="112" y1="112" x2="104" y2="104" />
+                <line x1="112" y1="28" x2="104" y2="36" />
+                <line x1="28" y1="112" x2="36" y2="104" />
+                <path d="M 108 70 L 118 70 L 118 58" fill="none" />
+                <path d="M 32 70 L 22 70 L 22 82" fill="none" />
+                <path d="M 70 32 L 70 22 L 58 22" fill="none" />
+                <path d="M 95 95 L 105 105" stroke-width="1" opacity="0.7" />
+              </g>
+            </svg>
+          </div>
+          <h1 class="architect-name font-orbitron">A R C H I T E C T</h1>
+          <p class="architect-jp jp">設計者</p>
+          <p class="architect-tagline">The One Who Sees Everything</p>
+          <div class="architect-status-row font-orbitron">
+            <span class="status-dot" aria-hidden="true"></span>
+            ONLINE // ALWAYS WATCHING
+          </div>
+          <div class="architect-divider"></div>
+          <p class="architect-cap-label font-orbitron">CAPABILITIES</p>
+          <ul class="architect-cap-list">
+            <li><span class="cap-prefix">✦</span> Brutally honest feedback</li>
+            <li><span class="cap-prefix">✦</span> Anti-cheat interrogation</li>
+            <li><span class="cap-prefix">✦</span> Routine &amp; life optimization</li>
+            <li><span class="cap-prefix">✦</span> Academic help (any subject)</li>
+            <li><span class="cap-prefix">✦</span> Math solving &amp; fact lookup</li>
+            <li><span class="cap-prefix">✦</span> Goal analysis &amp; strategy</li>
+            <li><span class="cap-prefix">✦</span> Mental clarity &amp; reflection</li>
+            <li><span class="cap-prefix">✦</span> Daily planning</li>
+          </ul>
+          <div class="architect-divider"></div>
+          <div class="architect-player-card card" id="architect-player-card">
+            <div class="architect-player-row">
+              <span class="architect-player-emoji" id="arch-player-emoji">🎮</span>
+              <div>
+                <span class="font-orbitron architect-player-tag" id="arch-player-tag">—</span>
+                <span class="architect-level-badge font-orbitron" id="arch-player-level">LV 1</span>
+              </div>
+            </div>
+            <p class="architect-briefing-loaded font-orbitron">BRIEFING LOADED</p>
+            <p class="architect-player-hint">ARCHITECT knows your full profile.</p>
+          </div>
+          <button type="button" class="architect-clear-link font-orbitron" id="arch-clear-session">CLEAR SESSION</button>
+          <a class="architect-hq-link font-orbitron" href="dashboard.html">← RETURN TO HQ</a>
+        </div>
+      </aside>
+
+      <section id="architect-chat" class="architect-chat">
+        <header id="chat-header" class="chat-header">
+          <div class="chat-header__left">
+            <svg class="chat-header-eye" viewBox="0 0 48 48" width="30" height="30" aria-hidden="true">
+              <ellipse cx="24" cy="24" rx="16" ry="10" fill="none" stroke="#1a6b8a" stroke-width="1.5" />
+              <circle cx="24" cy="24" r="4" fill="#1a6b8a" />
+            </svg>
+            <span class="chat-header-title font-orbitron">ARCHITECT</span>
+          </div>
+          <span class="chat-session-count muted" id="chat-session-count"></span>
+          <a class="btn btn-cyan btn-hq-mobile font-orbitron" href="dashboard.html">← HQ</a>
+        </header>
+
+        <div id="quick-prompts" class="quick-prompts" role="toolbar" aria-label="Quick prompts"></div>
+
+        <div class="messages-wrap">
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <button type="button" class="scroll-bottom-btn btn btn-cyan font-orbitron" id="scroll-bottom-btn" aria-label="Scroll to bottom">↓</button>
+        </div>
+
+        <div id="chat-input-area" class="chat-input-area">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Transmit to ARCHITECT... (Enter to send, Shift+Enter for new line)"
+            autocomplete="off"
+          ></textarea>
+          <button type="button" class="btn btn-cyan" id="chat-send">TRANSMIT ▶</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+    <script defer>
+      (function () {
+        const _authUser = getCurrentUser();
+        const _authPlayer = getPlayer();
+        if (!_authUser || !_authPlayer) {
+          localStorage.setItem("redirectAfterLogin", "architect.html");
+          window.location.href = "login.html";
+          return;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const username = _authUser;
+          const p = _authPlayer;
+          const storageKey = "architectHistory_" + username;
+          let chatHistory = [];
+
+          const sendBtn = document.getElementById("chat-send");
+          const inputEl = document.getElementById("chat-input");
+          console.log("Send button:", sendBtn);
+          console.log("Input:", inputEl);
+
+          const messagesEl = document.getElementById("messages");
+          const scrollBottomBtn = document.getElementById("scroll-bottom-btn");
+
+          function escapeHtml(t) {
+            const d = document.createElement("div");
+            d.textContent = t;
+            return d.innerHTML;
+          }
+
+          function renderMarkdownLite(text) {
+            if (text == null) return "";
+            return String(text)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\*(.*?)\*/g, "<em>$1</em>")
+              .replace(/^- (.+)$/gm, '<span class="msg-list-item"><span class="msg-li-prefix">✦</span> $1</span>')
+              .replace(/\n/g, "<br>");
+          }
+
+          function appendMessage(role, text, isError) {
+            if (!messagesEl) return;
+            if (isError == null) isError = false;
+            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            let div;
+            if (role === "user") {
+              div = document.createElement("div");
+              div.className = "msg-user msg-enter";
+              div.innerHTML =
+                '<div class="msg-user-bubble">' +
+                escapeHtml(text) +
+                '</div><span class="msg-time font-orbitron">' +
+                time +
+                "</span>";
+              messagesEl.appendChild(div);
+            } else {
+              div = document.createElement("div");
+              div.className = "msg-architect msg-enter" + (isError ? " msg-architect--error" : "");
+              div.innerHTML =
+                '<div class="msg-architect-inner">' +
+                '<div class="msg-architect-hdr">' +
+                '<svg class="msg-architect-eye" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="#1a6b8a" stroke-width="1.2"/><circle cx="16" cy="16" r="2.5" fill="#1a6b8a"/></svg>' +
+                '<span class="font-orbitron">ARCHITECT</span></div>' +
+                '<div class="msg-architect-body">' +
+                renderMarkdownLite(text) +
+                "</div>" +
+                '<span class="msg-time font-orbitron">' +
+                time +
+                "</span></div>";
+              messagesEl.appendChild(div);
+            }
+            div.style.animation = "msgIn 0.2s ease forwards";
+          }
+
+          function showTyping() {
+            if (!messagesEl) return null;
+            const div = document.createElement("div");
+            div.className = "msg-architect msg-typing msg-enter";
+            div.innerHTML =
+              '<div class="msg-architect-inner msg-typing-inner">' +
+              '<span class="font-orbitron">ARCHITECT IS PROCESSING</span>' +
+              '<span class="typing-dots" aria-hidden="true"><span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span></span>' +
+              '<p class="jp typing-jp muted">処理中...</p></div>';
+            messagesEl.appendChild(div);
+            return div;
+          }
+
+          function scrollToBottom() {
+            if (!messagesEl) return;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          }
+
+          function updateMessageCount() {
+            const counter = document.getElementById("chat-session-count");
+            if (!counter || !window.matchMedia("(min-width: 768px)").matches) {
+              if (counter) counter.textContent = "";
+              return;
+            }
+            const count = chatHistory.length;
+            counter.textContent = Math.floor(count / 2) + " messages this session";
+          }
+
+          function isNearBottom() {
+            if (!messagesEl) return true;
+            const th = 100;
+            return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < th;
+          }
+
+          function updateScrollBtn() {
+            if (!scrollBottomBtn) return;
+            scrollBottomBtn.classList.toggle("is-visible", !isNearBottom());
+          }
+
+          if (messagesEl) {
+            messagesEl.addEventListener("scroll", updateScrollBtn);
+          }
+          if (scrollBottomBtn) {
+            scrollBottomBtn.addEventListener("click", function () {
+              scrollToBottom();
+              updateScrollBtn();
+            });
+          }
+
+          function autoResize() {
+            if (!inputEl) return;
+            inputEl.style.height = "auto";
+            inputEl.style.height = Math.min(120, Math.max(44, inputEl.scrollHeight)) + "px";
+          }
+
+          async function handleSend() {
+            if (!inputEl || !sendBtn) return;
+            if (sendBtn.disabled) return;
+            const text = inputEl.value.trim();
+            console.log("handleSend called, text:", text);
+            if (!text) return;
+
+            sendBtn.disabled = true;
+            inputEl.disabled = true;
+            const originalText = sendBtn.textContent;
+            sendBtn.textContent = "...";
+
+            inputEl.value = "";
+            inputEl.style.height = "44px";
+
+            appendMessage("user", text);
+            scrollToBottom();
+            updateScrollBtn();
+
+            chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+            const typingEl = showTyping();
+            scrollToBottom();
+            updateScrollBtn();
+
+            try {
+              const sysPrompt = typeof buildArchitectPrompt === "function" ? buildArchitectPrompt() : "";
+              console.log("Calling ARCHITECT API...");
+
+              const historyToSend = chatHistory.slice(0, -1);
+              const response = await callArchitect(sysPrompt, historyToSend, text);
+
+              console.log("ARCHITECT response:", response);
+
+              if (typingEl) typingEl.remove();
+
+              if (response == null || response === "") throw new Error("Empty response");
+
+              appendMessage("architect", response);
+              chatHistory.push({ role: "model", parts: [{ text: response }] });
+
+              if (chatHistory.length > 20) {
+                chatHistory = chatHistory.slice(chatHistory.length - 20);
+              }
+
+              try {
+                localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
+              } catch (e) {}
+
+              updateMessageCount();
+              scrollToBottom();
+              updateScrollBtn();
+            } catch (err) {
+              console.error("ARCHITECT error:", err);
+              if (typingEl) typingEl.remove();
+              appendMessage(
+                "architect",
+                "Connection disrupted. Check your API key or network. — 接続エラー",
+                true
+              );
+              scrollToBottom();
+              updateScrollBtn();
+            } finally {
+              sendBtn.disabled = false;
+              sendBtn.textContent = originalText;
+              inputEl.disabled = false;
+            }
+          }
+
+          async function generateOpeningMessage() {
+            const pl = getPlayer();
+            if (!pl) return;
+
+            const typingEl = showTyping();
+            scrollToBottom();
+            updateScrollBtn();
+
+            let fieldContext = "";
+            if (pl.lifeField === "school") fieldContext = "Grade " + (pl.grade || "?") + " student";
+            else if (pl.lifeField === "university")
+              fieldContext = (pl.major || "Studies") + " student at " + (pl.universityName || "university");
+            else if (pl.lifeField === "job")
+              fieldContext = (pl.jobTitle || "Professional") + " at " + (pl.company || "");
+            else if (pl.lifeField === "retired") fieldContext = "retired " + (pl.previousProfession || "");
+
+            const prompt =
+              "You are ARCHITECT. Generate your opening message to " +
+              (pl.realName || "the player") +
+              ' who calls themselves "' +
+              (pl.title || "operator") +
+              '". They are ' +
+              (pl.age || "?") +
+              " years old, a " +
+              fieldContext +
+              '. Their stated struggle: "' +
+              (pl.architectBriefing || "") +
+              '". Their current level: ' +
+              (pl.level || 1) +
+              ", streak: " +
+              (pl.streak || 0) +
+              " days. Write 3-4 sentences. Be direct. Reference their title and struggle. Make them feel seen and slightly challenged. No fluff. Do not start with Hello or Hi. Start with their name or title.";
+
+            try {
+              const response = await callArchitectOnce(prompt, 512);
+              if (typingEl) typingEl.remove();
+              const trimmed = (response || "").trim();
+              appendMessage("architect", trimmed);
+              chatHistory.push({ role: "model", parts: [{ text: trimmed }] });
+              localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
+              updateMessageCount();
+              scrollToBottom();
+              updateScrollBtn();
+            } catch (err) {
+              console.error("Opening message error:", err);
+              if (typingEl) typingEl.remove();
+              appendMessage("architect", "ARCHITECT is offline. Check your API key in app.js.", true);
+              scrollToBottom();
+              updateScrollBtn();
+            }
+          }
+
+          if (sendBtn) {
+            sendBtn.addEventListener("click", function () {
+              console.log("Send clicked");
+              handleSend();
+            });
+          }
+
+          if (inputEl) {
+            inputEl.addEventListener("keydown", function (e) {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                console.log("Enter pressed");
+                handleSend();
+              }
+            });
+            inputEl.addEventListener("input", autoResize);
+          }
+
+          function populatePlayerCard() {
+            document.getElementById("arch-player-emoji").textContent = p.avatar || "🎮";
+            document.getElementById("arch-player-tag").textContent = "@" + (p.username || username);
+            document.getElementById("arch-player-level").textContent = "LV " + (p.level || 1);
+          }
+
+          const prompts = [
+            "💡 Build my routine",
+            "📐 Solve this for me",
+            "🎯 Review my goals",
+            "🔥 Motivate me. Brutally.",
+            "🧠 What should I focus on?",
+            "📊 Analyze my progress",
+            "❓ Ask me something hard",
+            "🌐 Find a fact for me",
+          ];
+          const qp = document.getElementById("quick-prompts");
+          if (qp && inputEl) {
+            prompts.forEach(function (label) {
+              const b = document.createElement("button");
+              b.type = "button";
+              b.className = "quick-prompt-chip";
+              b.textContent = label;
+              b.addEventListener("click", function () {
+                inputEl.value = label;
+                inputEl.focus();
+                autoResize();
+              });
+              qp.appendChild(b);
+            });
+          }
+
+          document.getElementById("arch-clear-session").addEventListener("click", function () {
+            if (!confirm("This will erase ARCHITECT's memory of this session.")) return;
+            chatHistory = [];
+            localStorage.removeItem(storageKey);
+            if (messagesEl) messagesEl.innerHTML = "";
+            updateMessageCount();
+            generateOpeningMessage();
+          });
+
+          const _savedHistory = localStorage.getItem("architectHistory_" + username);
+          if (_savedHistory) {
+            try {
+              chatHistory = JSON.parse(_savedHistory);
+              if (!Array.isArray(chatHistory)) chatHistory = [];
+              chatHistory.forEach(function (msg) {
+                const t = msg.parts && msg.parts[0] ? msg.parts[0].text : "";
+                if (msg.role === "user") appendMessage("user", t);
+                else if (msg.role === "model") appendMessage("architect", t);
+              });
+            } catch (e) {
+              chatHistory = [];
+            }
+          }
+
+          if (chatHistory.length === 0) {
+            generateOpeningMessage();
+          }
+
+          populatePlayerCard();
+          updateMessageCount();
+          scrollToBottom();
+          updateScrollBtn();
+          window.addEventListener("resize", updateMessageCount);
+        });
+      })();
+    </script>
+  </body>
+</html>

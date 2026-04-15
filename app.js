@@ -1,5 +1,6 @@
-const GEMINI_API_KEY = "AIzaSyD0dEjRpE1jAIJUvNPWVghpIXhOaqGjrOo";
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+const GROQ_API_KEY = "YOUR_GROQ_KEY_HERE";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama3-8b-8192";
 // Storage helpers
 function getPlayer() {
   const current = getCurrentUser();
@@ -122,58 +123,89 @@ function createToastContainer() {
   return c;
 }
 
-// Gemini API
+// Groq API
 async function callArchitect(systemPrompt, history = [], userMessage) {
-  const contents = [
-    ...history,
-    { role: "user", parts: [{ text: userMessage }] },
+  const messages = [
+    { role: "system", content: String(systemPrompt || "") },
+    ...history.map((m) => {
+      const role = m?.role === "model" ? "assistant" : m?.role || "user";
+      const content = Array.isArray(m?.parts)
+        ? m.parts
+            .map((p) => p?.text)
+            .filter(Boolean)
+            .join("\n")
+        : "";
+      return { role, content };
+    }),
+    { role: "user", content: String(userMessage || "") },
   ];
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
+  const response = await fetch(GROQ_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+    },
     body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      generationConfig: { maxOutputTokens: 1024, temperature: 0.85 },
+      model: GROQ_MODEL,
+      messages,
+      max_tokens: 1024,
+      temperature: 0.85,
     }),
   });
-  const data = await response.json();
-  if (!data.candidates || !data.candidates[0]) {
-    const reason = data.error?.message || data.promptFeedback?.blockReason || JSON.stringify(data);
-    throw new Error("Gemini API: " + reason);
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
   }
-  return data.candidates[0].content.parts[0].text;
+  const data = await response.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Empty response");
+  return text;
 }
 
 async function callArchitectOnce(prompt, maxOutputTokens = 128) {
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
+  const response = await fetch(GROQ_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+    },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens, temperature: 0.6 },
+      model: GROQ_MODEL,
+      messages: [{ role: "user", content: String(prompt || "") }],
+      max_tokens: maxOutputTokens,
+      temperature: 0.6,
     }),
   });
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    const reason = data?.error?.message || data?.promptFeedback?.blockReason || JSON.stringify(data);
-    throw new Error(reason || "Empty response");
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
   }
+  const data = await response.json();
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error(data?.error?.message || "Empty response");
   return text;
 }
 
 async function callArchitectText(prompt, maxOutputTokens = 1024) {
-  const response = await fetch(GEMINI_URL + GEMINI_API_KEY, {
+  const response = await fetch(GROQ_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+    },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens, temperature: 0.75 },
+      model: GROQ_MODEL,
+      messages: [{ role: "user", content: String(prompt || "") }],
+      max_tokens: maxOutputTokens,
+      temperature: 0.75,
     }),
   });
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
+  }
   const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  return data?.choices?.[0]?.message?.content || "";
 }
 
 async function fetchSubjectEmoji(subjectName) {
@@ -346,8 +378,8 @@ function initArchitectPage() {
       showToast("Enter a message.", "warning");
       return;
     }
-    if (GEMINI_API_KEY === "YOUR_KEY_HERE") {
-      showToast("Set GEMINI_API_KEY in app.js", "error");
+    if (GROQ_API_KEY === "YOUR_GROQ_KEY_HERE") {
+      showToast("Set GROQ_API_KEY in app.js", "error");
       return;
     }
     out.textContent = "…";

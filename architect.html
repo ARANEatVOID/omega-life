@@ -251,10 +251,16 @@
           }
 
           async function handleSend() {
-            if (!inputEl) return;
+            if (!inputEl || !sendBtn) return;
+            if (sendBtn.disabled) return;
             const text = inputEl.value.trim();
             console.log("handleSend called, text:", text);
             if (!text) return;
+
+            sendBtn.disabled = true;
+            inputEl.disabled = true;
+            const originalText = sendBtn.textContent;
+            sendBtn.textContent = "...";
 
             inputEl.value = "";
             inputEl.style.height = "44px";
@@ -269,19 +275,19 @@
             scrollToBottom();
             updateScrollBtn();
 
-            if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
-              if (typingEl) typingEl.remove();
-              appendMessage(
-                "architect",
-                "No API key configured. Open app.js and set GEMINI_API_KEY. — 未設定",
-                true
-              );
-              scrollToBottom();
-              updateScrollBtn();
-              return;
-            }
-
             try {
+              if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
+                if (typingEl) typingEl.remove();
+                appendMessage(
+                  "architect",
+                  "No API key configured. Open app.js and set GEMINI_API_KEY. — 未設定",
+                  true
+                );
+                scrollToBottom();
+                updateScrollBtn();
+                return;
+              }
+
               const sysPrompt = typeof buildArchitectPrompt === "function" ? buildArchitectPrompt() : "";
               console.log("Calling ARCHITECT API...");
 
@@ -318,6 +324,10 @@
               );
               scrollToBottom();
               updateScrollBtn();
+            } finally {
+              sendBtn.disabled = false;
+              sendBtn.textContent = originalText;
+              inputEl.disabled = false;
             }
           }
 

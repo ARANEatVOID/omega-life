@@ -828,7 +828,12 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       });
       showToast("Boss template applied.", "success");
     });
-    document.getElementById("btn-summon-boss").addEventListener("click", () => {
+    document.getElementById("btn-summon-boss").addEventListener("click", async (e) => {
+      const button = e.currentTarget;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "...";
+      try {
       const name = document.getElementById("boss-name").value.trim();
       if (!name) return showToast("Name your boss.", "warning");
       const p = ensurePlayer(getPlayer());
@@ -849,6 +854,10 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       el.classList.add("is-hidden");
       renderBosses();
       showToast("Boss summoned.", "success");
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
   }
 
@@ -1158,13 +1167,78 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
     grid.querySelectorAll(".planner-slot").forEach((slot) => {
       slot.addEventListener("click", (e) => {
         if (e.target.closest(".planner-del")) return;
+        if (e.target.closest(".planner-inline-form")) return;
         const hour = Number(slot.dataset.hour);
-        const name = prompt("Activity name?");
-        if (!name) return;
-        const domain = prompt("Domain id (biological, academic, ...)?") || "academic";
-        plannerBlocks.push({ hour, name, domain, xp: 10 });
-        savePlannerDay();
-        renderPlanner();
+        const existingForm = grid.querySelector(".planner-inline-form");
+        if (existingForm) existingForm.closest(".planner-slot")?.dispatchEvent(new Event("cancelInlineForm"));
+
+        const originalContent = slot.innerHTML;
+        slot.innerHTML = `
+          <div class="planner-inline-form card" style="padding:8px;display:grid;gap:6px;">
+            <input type="text" class="form-input" data-role="activity" placeholder="Activity name" />
+            <select class="form-input" data-role="domain">
+              <option value="biological">biological</option>
+              <option value="psychological">psychological</option>
+              <option value="social">social</option>
+              <option value="academic" selected>academic</option>
+              <option value="economic">economic</option>
+              <option value="time">time</option>
+              <option value="creative">creative</option>
+              <option value="existential">existential</option>
+            </select>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn btn-cyan btn-sm" data-role="confirm">CONFIRM</button>
+              <button type="button" class="btn btn-yellow btn-sm" data-role="cancel">CANCEL</button>
+            </div>
+          </div>`;
+
+        const form = slot.querySelector(".planner-inline-form");
+        const activityInput = form?.querySelector('[data-role="activity"]');
+        const domainSelect = form?.querySelector('[data-role="domain"]');
+        const confirmBtn = form?.querySelector('[data-role="confirm"]');
+        const cancelBtn = form?.querySelector('[data-role="cancel"]');
+
+        const closeForm = () => {
+          slot.innerHTML = originalContent;
+          grid.querySelectorAll(".planner-del").forEach((btn) => {
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const h = Number(btn.dataset.hour);
+              plannerBlocks = plannerBlocks.filter((b) => b.hour !== h);
+              savePlannerDay();
+              renderPlanner();
+            });
+          });
+        };
+
+        slot.addEventListener(
+          "cancelInlineForm",
+          () => {
+            closeForm();
+          },
+          { once: true }
+        );
+
+        confirmBtn?.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          const name = activityInput?.value.trim() || "";
+          if (!name) {
+            showToast("Activity name required.", "warning");
+            activityInput?.focus();
+            return;
+          }
+          const domain = domainSelect?.value || "academic";
+          plannerBlocks.push({ hour, name, domain, xp: 10 });
+          savePlannerDay();
+          renderPlanner();
+        });
+
+        cancelBtn?.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          closeForm();
+        });
+
+        activityInput?.focus();
       });
     });
     grid.querySelectorAll(".planner-del").forEach((btn) => {
@@ -1310,6 +1384,11 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       };
       p.tasks.push(task);
       syncPlayerToStore(p);
+      taskForm.secondaries = new Set();
+      document
+        .getElementById("task-secondary-chips")
+        ?.querySelectorAll(".chip")
+        .forEach((c) => c.classList.remove("is-selected"));
       document.getElementById("task-name").value = "";
       document.getElementById("add-task-panel")?.classList.add("is-hidden");
       renderTasks();
@@ -1320,21 +1399,30 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       document.getElementById("add-boss-panel")?.classList.toggle("is-hidden");
     });
 
-    document.getElementById("anticheat-honest")?.addEventListener("click", async () => {
+    document.getElementById("anticheat-honest")?.addEventListener("click", async (e) => {
+      const button = e.currentTarget;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "...";
       const t = pendingAnticheatTask;
-      if (!t) return closeAnticheat();
-      const p = ensurePlayer(getPlayer());
-      p.trustArchitect = true;
-      syncPlayerToStore(p);
-      closeAnticheat();
-      finalizeTaskComplete(t);
       try {
-        if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY !== "YOUR_KEY_HERE") {
-          const line = await callArchitectOnce("One short cold approving sentence. Player was honest.", 80);
-          showToast(line.trim(), "success");
-        }
-      } catch (_) {}
-      checkAchievements();
+        if (!t) return closeAnticheat();
+        const p = ensurePlayer(getPlayer());
+        p.trustArchitect = true;
+        syncPlayerToStore(p);
+        closeAnticheat();
+        finalizeTaskComplete(t);
+        try {
+          if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY !== "YOUR_KEY_HERE") {
+            const line = await callArchitectOnce("One short cold approving sentence. Player was honest.", 80);
+            showToast(line.trim(), "success");
+          }
+        } catch (_) {}
+        checkAchievements();
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
     document.getElementById("anticheat-cancel")?.addEventListener("click", () => {
       closeAnticheat();
@@ -1364,7 +1452,11 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       checkAchievements();
       renderPlanner();
     });
-    document.getElementById("planner-architect")?.addEventListener("click", async () => {
+    document.getElementById("planner-architect")?.addEventListener("click", async (e) => {
+      const button = e.currentTarget;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "...";
       const st = document.getElementById("planner-architect-status");
       st.classList.remove("is-hidden");
       st.textContent = "ARCHITECT IS CALCULATING YOUR ROUTINE...";
@@ -1382,6 +1474,18 @@ Recent tasks=${(p.taskHistory || []).slice(-5).map((x) => x.name).join(",")}`;
         text.split("\n").forEach((line) => {
           const m = line.match(/(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*(\d+)/);
           if (!m) return;
+          const matchedDomain = m[4].trim().toLowerCase();
+          const normalizedDomain =
+            [
+              "biological",
+              "psychological",
+              "social",
+              "academic",
+              "economic",
+              "time",
+              "creative",
+              "existential",
+            ].find((id) => matchedDomain.includes(id)) || "academic";
           const b = document.createElement("button");
           b.type = "button";
           b.className = "chip chip-toggle";
@@ -1391,7 +1495,7 @@ Recent tasks=${(p.taskHistory || []).slice(-5).map((x) => x.name).join(",")}`;
             plannerBlocks.push({
               hour: h,
               name: m[3].trim(),
-              domain: m[4].trim().toLowerCase().split(" ")[0] || "academic",
+              domain: normalizedDomain,
               xp: Number(m[5]),
             });
             savePlannerDay();
@@ -1400,8 +1504,13 @@ Recent tasks=${(p.taskHistory || []).slice(-5).map((x) => x.name).join(",")}`;
           chips.appendChild(b);
         });
         st.textContent = "Suggestions ready. Tap a chip to add.";
-      } catch {
-        st.textContent = "ARCHITECT unavailable.";
+      } catch (err) {
+        console.error("Planner architect suggestion failed:", err);
+        st.classList.remove("is-hidden");
+        st.textContent = "ARCHITECT unavailable. Failed to fetch suggestions.";
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
       }
     });
 

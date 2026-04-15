@@ -741,7 +741,7 @@
       tasksCompleted: 0,
       bossesDefeated: 0,
       taskHistory: [],
-      planHistory: [],
+      planHistory: {},
       bosses: [],
       createdAt: Date.now(),
     };

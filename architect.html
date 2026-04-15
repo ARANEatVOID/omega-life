@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OMEGA LIFE — ARCHITECT</title>
+    <title>Re:LiFE — ARCHITECT</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body class="architect-page">
@@ -31,10 +31,10 @@
                   </feMerge>
                 </filter>
               </defs>
-              <g filter="url(#archEyeGlow)" stroke="#00fff5" fill="none" stroke-width="1.5">
+              <g filter="url(#archEyeGlow)" stroke="#1a6b8a" fill="none" stroke-width="1.5">
                 <circle cx="70" cy="70" r="38" />
-                <circle cx="70" cy="70" r="18" fill="rgba(0,255,245,0.05)" />
-                <circle cx="70" cy="70" r="6" fill="#00fff5" stroke="none" />
+                <circle cx="70" cy="70" r="18" fill="rgba(26,107,138,0.08)" />
+                <circle cx="70" cy="70" r="6" fill="#1a6b8a" stroke="none" />
                 <line x1="70" y1="8" x2="70" y2="18" />
                 <line x1="70" y1="122" x2="70" y2="132" />
                 <line x1="8" y1="70" x2="18" y2="70" />
@@ -90,8 +90,8 @@
         <header id="chat-header" class="chat-header">
           <div class="chat-header__left">
             <svg class="chat-header-eye" viewBox="0 0 48 48" width="30" height="30" aria-hidden="true">
-              <ellipse cx="24" cy="24" rx="16" ry="10" fill="none" stroke="#00fff5" stroke-width="1.5" />
-              <circle cx="24" cy="24" r="4" fill="#00fff5" />
+              <ellipse cx="24" cy="24" rx="16" ry="10" fill="none" stroke="#1a6b8a" stroke-width="1.5" />
+              <circle cx="24" cy="24" r="4" fill="#1a6b8a" />
             </svg>
             <span class="chat-header-title font-orbitron">ARCHITECT</span>
           </div>
@@ -182,7 +182,7 @@
               div.innerHTML =
                 '<div class="msg-architect-inner">' +
                 '<div class="msg-architect-hdr">' +
-                '<svg class="msg-architect-eye" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="#00fff5" stroke-width="1.2"/><circle cx="16" cy="16" r="2.5" fill="#00fff5"/></svg>' +
+                '<svg class="msg-architect-eye" viewBox="0 0 32 32" width="16" height="16" aria-hidden="true"><ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="#1a6b8a" stroke-width="1.2"/><circle cx="16" cy="16" r="2.5" fill="#1a6b8a"/></svg>' +
                 '<span class="font-orbitron">ARCHITECT</span></div>' +
                 '<div class="msg-architect-body">' +
                 renderMarkdownLite(text) +
@@ -276,18 +276,6 @@
             updateScrollBtn();
 
             try {
-              if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
-                if (typingEl) typingEl.remove();
-                appendMessage(
-                  "architect",
-                  "No API key configured. Open app.js and set GEMINI_API_KEY. — 未設定",
-                  true
-                );
-                scrollToBottom();
-                updateScrollBtn();
-                return;
-              }
-
               const sysPrompt = typeof buildArchitectPrompt === "function" ? buildArchitectPrompt() : "";
               console.log("Calling ARCHITECT API...");
 
@@ -365,20 +353,6 @@
               " days. Write 3-4 sentences. Be direct. Reference their title and struggle. Make them feel seen and slightly challenged. No fluff. Do not start with Hello or Hi. Start with their name or title.";
 
             try {
-              if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY === "YOUR_KEY_HERE") {
-                if (typingEl) typingEl.remove();
-                const fallback =
-                  (pl.realName || pl.title || "Operator") +
-                  ". I'm loaded. Your briefing is on file. Speak when you're ready to work — not when you want comfort.";
-                appendMessage("architect", fallback);
-                chatHistory.push({ role: "model", parts: [{ text: fallback }] });
-                localStorage.setItem("architectHistory_" + getCurrentUser(), JSON.stringify(chatHistory));
-                updateMessageCount();
-                scrollToBottom();
-                updateScrollBtn();
-                return;
-              }
-
               const response = await callArchitectOnce(prompt, 512);
               if (typingEl) typingEl.remove();
               const trimmed = (response || "").trim();

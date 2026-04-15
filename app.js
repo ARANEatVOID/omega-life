@@ -1,22 +1,54 @@
-const GROQ_API_KEY = "YOUR_GROQ_KEY_HERE";
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama3-8b-8192";
+const ARCHITECT_API_URL = "https://YOUR_RENDER_BACKEND_URL/api/architect";
 // Storage helpers
 function getPlayer() {
   const current = getCurrentUser();
-  let data;
-  try {
-    data = JSON.parse(localStorage.getItem("omegaPlayer"));
-  } catch {
-    return null;
+  if (!current) return null;
+
+  const safeParse = (raw) => {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const data = safeParse(localStorage.getItem("omegaPlayer"));
+  if (
+    data &&
+    typeof data === "object" &&
+    (!data.username || String(data.username).toLowerCase() === current.toLowerCase())
+  ) {
+    return data;
   }
-  if (!current || !data || typeof data !== "object") return null;
-  if (data.username && data.username.toLowerCase() !== current.toLowerCase()) return null;
-  return data;
+
+  const all = getAllPlayers();
+  const currentLc = current.toLowerCase();
+  const matchedKey = Object.keys(all).find((k) => String(k).toLowerCase() === currentLc);
+  if (matchedKey && all[matchedKey] && typeof all[matchedKey] === "object") {
+    const fallback = { ...all[matchedKey] };
+    if (!fallback.username) fallback.username = matchedKey;
+    localStorage.setItem("omegaPlayer", JSON.stringify(fallback));
+    return fallback;
+  }
+
+  return null;
 }
 
 function savePlayer(data) {
-  localStorage.setItem("omegaPlayer", JSON.stringify(data));
+  if (!data || typeof data !== "object") return;
+  const current = getCurrentUser();
+  const username = data.username || current;
+  const payload = { ...data, username };
+  localStorage.setItem("omegaPlayer", JSON.stringify(payload));
+
+  if (current) {
+    const all = getAllPlayers();
+    const currentLc = current.toLowerCase();
+    const matchedKey =
+      Object.keys(all).find((k) => String(k).toLowerCase() === currentLc) || current;
+    all[matchedKey] = JSON.parse(JSON.stringify(payload));
+    saveAllPlayers(all);
+  }
 }
 
 function getCurrentUser() {
@@ -124,88 +156,46 @@ function createToastContainer() {
 }
 
 // Groq API
-async function callArchitect(systemPrompt, history = [], userMessage) {
-  const messages = [
-    { role: "system", content: String(systemPrompt || "") },
-    ...history.map((m) => {
-      const role = m?.role === "model" ? "assistant" : m?.role || "user";
-      const content = Array.isArray(m?.parts)
-        ? m.parts
-            .map((p) => p?.text)
-            .filter(Boolean)
-            .join("\n")
-        : "";
-      return { role, content };
-    }),
-    { role: "user", content: String(userMessage || "") },
-  ];
-  const response = await fetch(GROQ_URL, {
+async function requestArchitectApi(payload) {
+  const response = await fetch(ARCHITECT_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
     },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages,
-      max_tokens: 1024,
-      temperature: 0.85,
-    }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
+    throw new Error(errData?.error || `Request failed (${response.status})`);
   }
   const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error("Empty response");
-  return text;
+  if (!data?.text) throw new Error("Empty response");
+  return data.text;
+}
+
+async function callArchitect(systemPrompt, history = [], userMessage) {
+  return requestArchitectApi({
+    mode: "chat",
+    systemPrompt: String(systemPrompt || ""),
+    history,
+    userMessage: String(userMessage || ""),
+  });
 }
 
 async function callArchitectOnce(prompt, maxOutputTokens = 128) {
-  const response = await fetch(GROQ_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: "user", content: String(prompt || "") }],
-      max_tokens: maxOutputTokens,
-      temperature: 0.6,
-    }),
+  return requestArchitectApi({
+    mode: "once",
+    prompt: String(prompt || ""),
+    maxOutputTokens,
   });
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
-  }
-  const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error(data?.error?.message || "Empty response");
-  return text;
 }
 
 async function callArchitectText(prompt, maxOutputTokens = 1024) {
-  const response = await fetch(GROQ_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: "user", content: String(prompt || "") }],
-      max_tokens: maxOutputTokens,
-      temperature: 0.75,
-    }),
+  return requestArchitectApi({
+    mode: "text",
+    prompt: String(prompt || ""),
+    maxOutputTokens,
   });
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData?.error?.message || `Request failed (${response.status})`);
-  }
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content || "";
 }
 
 async function fetchSubjectEmoji(subjectName) {
@@ -246,7 +236,7 @@ function buildArchitectPrompt() {
     fieldContext = `${p.jobTitle} at ${p.company}, ${p.yearsExp} yrs exp, targeting ${p.dreamJobTitle}`;
   else if (p.lifeField === "retired")
     fieldContext = `Former ${p.previousProfession}, now focused on ${(p.retirementGoals || []).join(", ")}`;
-  return `You are ARCHITECT — an AI mentor embedded in OMEGA LIFE, a gamified life operating system. You are blunt, intelligent, and deeply analytical. You do not sugarcoat. Ever. You speak in short, sharp, precise sentences. You are not cruel — you are honest. You address the user as ${p.realName} occasionally for impact. You know everything about them: Age: ${p.age} | Life field: ${p.lifeField} | ${fieldContext} | Self-given title: "${p.title}" | Domain priorities: ${(p.domainPriorities || []).join(", ")} | Biggest struggle: "${p.architectBriefing}" | Level: ${p.level} | XP: ${p.xp} | Streak: ${p.streak} days | Strongest domain: ${strongest} | Weakest domain: ${weakest} | Recent tasks: ${recentTasks}. You help with life advice, study help, math, science, facts, research, routine building, goal setting, mental clarity. You NEVER refuse a genuine question. Respond in the same language the user writes in. Occasionally drop one Japanese word for atmosphere with inline translation. Keep responses concise and impactful. No filler. No cheerleading. You are their most honest advisor. Not their friend. Their ARCHITECT.`;
+  return `You are ARCHITECT — an AI mentor embedded in Re:LiFE, a gamified life operating system. You are blunt, intelligent, and deeply analytical. You do not sugarcoat. Ever. You speak in short, sharp, precise sentences. You are not cruel — you are honest. You address the user as ${p.realName} occasionally for impact. You know everything about them: Age: ${p.age} | Life field: ${p.lifeField} | ${fieldContext} | Self-given title: "${p.title}" | Domain priorities: ${(p.domainPriorities || []).join(", ")} | Biggest struggle: "${p.architectBriefing}" | Level: ${p.level} | XP: ${p.xp} | Streak: ${p.streak} days | Strongest domain: ${strongest} | Weakest domain: ${weakest} | Recent tasks: ${recentTasks}. You help with life advice, study help, math, science, facts, research, routine building, goal setting, mental clarity. You NEVER refuse a genuine question. Respond in the same language the user writes in. Occasionally drop one Japanese word for atmosphere with inline translation. Keep responses concise and impactful. No filler. No cheerleading. You are their most honest advisor. Not their friend. Their ARCHITECT.`;
 }
 
 // Check achievements
@@ -346,7 +336,7 @@ function initKanji() {
   for (let i = 0; i < 12; i++) {
     const el = document.createElement("span");
     el.textContent = kanji[Math.floor(Math.random() * kanji.length)];
-    el.style.cssText = `position:absolute;font-family:'Noto Sans JP';font-size:${Math.random() * 20 + 12}px;color:var(--cyan);opacity:0.06;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation:kanjiFloat ${Math.random() * 15 + 10}s linear infinite;animation-delay:-${Math.random() * 15}s;`;
+    el.style.cssText = `position:absolute;font-family:'Noto Sans JP';font-size:${Math.random() * 20 + 12}px;color:var(--cyan);opacity:0.12;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation:kanjiFloat ${Math.random() * 15 + 10}s linear infinite;animation-delay:-${Math.random() * 15}s;`;
     container.appendChild(el);
   }
   document.body.appendChild(container);
@@ -376,10 +366,6 @@ function initArchitectPage() {
     const text = input.value.trim();
     if (!text) {
       showToast("Enter a message.", "warning");
-      return;
-    }
-    if (GROQ_API_KEY === "YOUR_GROQ_KEY_HERE") {
-      showToast("Set GROQ_API_KEY in app.js", "error");
       return;
     }
     out.textContent = "…";
@@ -533,7 +519,7 @@ function initKatakanaRain() {
 
     for (let i = 0; i < columnCount; i++) {
       const x = i * fontSize + fontSize / 2;
-      ctx.fillStyle = "rgba(0, 255, 245, 0.15)";
+      ctx.fillStyle = "rgba(26, 107, 138, 0.15)";
       ctx.fillText(colChars[i], x, heads[i]);
       heads[i] += speeds[i];
       if (heads[i] > h + fontSize) {

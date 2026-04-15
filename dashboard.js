@@ -4,10 +4,10 @@
   const DOMAINS = [
     { id: "biological", icon: "⚡", label: "Biological", color: "#00ff9f" },
     { id: "psychological", icon: "🧠", label: "Psychological", color: "#b44fff" },
-    { id: "social", icon: "👥", label: "Social", color: "#00fff5" },
-    { id: "academic", icon: "📚", label: "Academic", color: "#d4ff00" },
+    { id: "social", icon: "👥", label: "Social", color: "#1a6b8a" },
+    { id: "academic", icon: "📚", label: "Academic", color: "#c8960c" },
     { id: "economic", icon: "💴", label: "Economic", color: "#ff8c00" },
-    { id: "time", icon: "⏱️", label: "Time / Productivity", color: "#ff2d78" },
+    { id: "time", icon: "⏱️", label: "Time / Productivity", color: "#d7263d" },
     { id: "creative", icon: "🎨", label: "Creative", color: "#ff6ec7" },
     { id: "existential", icon: "🔮", label: "Existential", color: "#a0a0ff" },
   ];
@@ -94,6 +94,13 @@
   let plannerDate = null;
   let plannerBlocks = [];
   let taskForm = { xp: 25, time: "15min", priority: "MEDIUM", secondaries: new Set() };
+
+  function makeId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `id_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  }
 
   function calcLevelProgress(totalXP) {
     if (typeof levelFromXP === "function") return levelFromXP(totalXP);
@@ -198,7 +205,7 @@
     const R = Math.min(w, h) * 0.38;
     const order = DOMAINS.map((d) => d.id);
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(0,255,245,0.25)";
+    ctx.strokeStyle = "rgba(26,107,138,0.25)";
     ctx.lineWidth = 1;
     for (let ring = 1; ring <= 4; ring++) {
       ctx.beginPath();
@@ -223,7 +230,7 @@
     ctx.beginPath();
     pts.forEach((pt, i) => (i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)));
     ctx.closePath();
-    ctx.fillStyle = "rgba(0,255,245,0.12)";
+    ctx.fillStyle = "rgba(26,107,138,0.12)";
     ctx.fill();
     ctx.strokeStyle = "var(--cyan)";
     ctx.stroke();
@@ -495,7 +502,7 @@
     if (!name) return;
     const dom = document.getElementById("task-domain").value;
     const tpl = {
-      id: crypto.randomUUID(),
+      id: makeId(),
       templateName: name.trim(),
       name: document.getElementById("task-name").value.trim(),
       description: document.getElementById("task-desc").value.trim(),
@@ -667,13 +674,8 @@ Max 2 sentences. Task: ${task.name}. Estimated: ${estMin} min. Completed in: ${t
 Player age: ${p.age}. Life field: ${p.lifeField}.`;
     (async () => {
       try {
-        if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY !== "YOUR_KEY_HERE") {
-          const text = await callArchitectOnce(prompt, 256);
-          qEl.innerHTML = `<span class="anticheat-qtext">${escapeHtml(text.trim())}</span>`;
-        } else {
-          qEl.innerHTML =
-            '<span class="anticheat-qtext">Did you actually do this, or are you lying to yourself?</span>';
-        }
+        const text = await callArchitectOnce(prompt, 256);
+        qEl.innerHTML = `<span class="anticheat-qtext">${escapeHtml(text.trim())}</span>`;
       } catch {
         qEl.innerHTML =
           '<span class="anticheat-qtext">Prove it. What was the hardest step?</span>';
@@ -798,7 +800,7 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       const templateName = prompt("Boss template name?");
       if (!templateName) return;
       p.bossTemplates.push({
-        id: crypto.randomUUID(),
+        id: makeId(),
         templateName: templateName.trim(),
         name: document.getElementById("boss-name").value.trim(),
         domain: document.getElementById("boss-domain").value,
@@ -841,7 +843,7 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       const subj =
         dom === "academic" ? document.getElementById("boss-subject").value : null;
       p.bosses.push({
-        id: crypto.randomUUID(),
+        id: makeId(),
         name,
         domain: dom,
         subject: subj,
@@ -1364,7 +1366,7 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
       const p = ensurePlayer(getPlayer());
       const dom = document.getElementById("task-domain").value;
       const task = {
-        id: crypto.randomUUID(),
+        id: makeId(),
         name,
         description: document.getElementById("task-desc").value.trim(),
         primaryDomain: dom,
@@ -1413,10 +1415,8 @@ Player age: ${p.age}. Life field: ${p.lifeField}.`;
         closeAnticheat();
         finalizeTaskComplete(t);
         try {
-          if (typeof GEMINI_API_KEY !== "undefined" && GEMINI_API_KEY !== "YOUR_KEY_HERE") {
-            const line = await callArchitectOnce("One short cold approving sentence. Player was honest.", 80);
-            showToast(line.trim(), "success");
-          }
+          const line = await callArchitectOnce("One short cold approving sentence. Player was honest.", 80);
+          showToast(line.trim(), "success");
         } catch (_) {}
         checkAchievements();
       } finally {

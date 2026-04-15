@@ -1,3 +1,7 @@
+const ARCHITECT_API_URL = "/api/architect";
+const GROQ_API_KEY = "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";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.1-8b-instant"
 const ARCHITECT_API_URL = "https://re-life-backend.onrender.com/api/architect";
 // Storage helpers
 function getPlayer() {
